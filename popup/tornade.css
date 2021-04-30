@@ -1,0 +1,12 @@
+#main_box{
+  background-color:#f2f1f0;
+  padding:0.5em;
+  resize:none;
+}
+#ok_box{
+  margin-top:1em;
+  text-align:right;
+}
+#ok_button{
+  width:64px;
+}

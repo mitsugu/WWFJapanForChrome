@@ -1,0 +1,24 @@
+#main_box {
+  padding:0.5em;
+  background-color:#f2f1f0;
+}
+#prefecture_box {
+  float:left;
+  padding:0.5em;
+}
+#region_box {
+  float:left;
+  padding:0.5em;
+}
+.item_name {
+  margin:0em 0.5em 0.5em 0.5em;
+}
+#pref_list {
+}
+#reg_list {
+}
+
+#button_box{
+  padding:05em 0em 0em 0em;
+  text-align:right;
+}

@@ -1,0 +1,35 @@
+{
+  "manifest_version": 2,
+  "name": "Hütte Nippon Private Edition",
+  "version": "0.1.0",
+
+  "description": "日本の週間天気予報を表示します。",
+
+  "icons": {
+    "48": "icons/48.png",
+    "96": "icons/96.png"
+  },
+
+  "browser_action": {
+    "default_icon": {
+      "19": "button/19.png",
+      "38": "button/38.png"
+    },
+    "default_title":"Hütte Nippon Private Edition",
+    "browser_style":true
+  },
+
+  "background": {
+    "scripts": ["bgs.js"]
+  },
+
+  "permissions": [
+    "https://www.jma.go.jp/",
+    "http://www.jma.go.jp/",
+    "http://feeds.feedburner.com/",
+    "http://feedproxy.google.com/",
+    "storage",
+    "tabs",
+    "contextMenus"
+  ]
+}

@@ -1,0 +1,18 @@
+#main_box{
+  background-color:#f2f1f0;
+  padding:0.5em;
+}
+#overall{
+  resize:none;
+  font-size:0.75em;
+  background-color:#f2f1f0;
+  width:412px;
+  height:238px
+}
+#ok_box{
+  margin-top:1em;
+  text-align:right;
+}
+#ok_button{
+  width:64px;
+}
