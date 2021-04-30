@@ -1,9 +1,9 @@
 {
   "manifest_version": 2,
-  "name": "Hütte Nippon Private Edition",
+  "name": "Hütte Nippon Origin",
   "version": "0.1.0",
 
-  "description": "日本の週間天気予報を表示します。",
+  "description": "日本の気象情報を表示します。",
 
   "icons": {
     "48": "icons/48.png",
@@ -15,7 +15,7 @@
       "19": "button/19.png",
       "38": "button/38.png"
     },
-    "default_title":"Hütte Nippon Private Edition",
+    "default_title":"Hütte Nippon Origin",
     "browser_style":true
   },
 

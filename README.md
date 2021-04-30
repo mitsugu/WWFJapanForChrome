@@ -1,2 +1,2 @@
-# Hutte Nippon Private Edition
-Hütte Nippon Private Edition
+# Hutte Nippon Origin
+Hütte Nippon Origin
