@@ -1,9 +1,67 @@
 (function(){
   var hutteNippon={};
-  hutteNippon.prefecture="",    // 都道府県
-  hutteNippon.region="",        // 一次細分区域
+  hutteNippon.prefecture="";    // 都道府県
   hutteNippon.weatherXMLDoc={}; // 週間天気予報 RSS
   var idWinLocation;
+  const pref = {
+    "010000" : "気象庁",
+    "011000" : "北海道 宗谷地方",
+    "012000" : "北海道 上川地方",
+    "013000" : "北海道 網走・北見・紋別地方",
+    "014100" : "北海道 釧路・根室・十勝地方",
+    "015000" : "北海道 胆振・日高地方",
+    "016000" : "北海道 石狩・空知・後志地方",
+    "017000" : "北海道渡島・檜山地方",
+    "020000" : "青森県",
+    "030000" : "岩手県",
+    "040000" : "宮城県",
+    "050000" : "秋田県",
+    "060000" : "山形県",
+    "070000" : "福島県",
+    "080000" : "茨城県",
+    "090000" : "栃木県",
+    "100000" : "群馬県",
+    "110000" : "埼玉県",
+    "120000" : "千葉県",
+    "130000" : "東京都",
+    "140000" : "神奈川県",
+    "150000" : "新潟県",
+    "160000" : "富山県",
+    "170000" : "石川県",
+    "180000" : "福井県",
+    "190000" : "山梨県",
+    "200000" : "長野県",
+    "210000" : "岐阜県",
+    "220000" : "静岡県",
+    "230000" : "愛知県",
+    "240000" : "三重県",
+    "250000" : "滋賀県",
+    "260000" : "京都府",
+    "270000" : "大阪府",
+    "280000" : "兵庫県",
+    "290000" : "奈良県",
+    "300000" : "和歌山県",
+    "310000" : "鳥取県",
+    "320000" : "島根県",
+    "330000" : "岡山県",
+    "340000" : "広島県",
+    "350000" : "山口県",
+    "360000" : "徳島県",
+    "370000" : "香川県",
+    "380000" : "愛媛県",
+    "390000" : "高知県",
+    "400000" : "福岡県",
+    "410000" : "佐賀県",
+    "420000" : "長崎県",
+    "430000" : "熊本県",
+    "440000" : "大分県",
+    "450000" : "宮崎県",
+    "460100" : "鹿児島県",
+    "471000" : "沖縄県 沖縄本島地方",
+    "472000" : "沖縄県 南大東島地方",
+    "473000" : "沖縄県 宮古島地方",
+    "474000" : "沖縄県 石垣島・八重山地方"
+  };
   const hWeather={              // お天気アイコン
     '晴れ':'100.png',
     '晴れ時々くもり':'101.png',
@@ -52,11 +110,10 @@
     var creating = browser.windows.create({
       url:        locationURL,
       type:       "popup",
-      height:     148,
-      width:      360
+      height:     132,
+      width:      384
     });
     creating.then((win)=>{
-      console.log("Location windowId : "+win.id);
       idWinLocation=win.id;
     },(result)=>{
       console.log("Location Window Open Error");
@@ -66,7 +123,7 @@
   function dispLocationButtonLavel(){
     var elm=document.getElementById('locationButton');
     var textNode=document.createTextNode(
-      hutteNippon.prefecture+"："+hutteNippon.region+"の週間天気予報");
+      hutteNippon.prefecture+"の週間天気予報");
     if(elm.childNodes.length>0){
       elm.removeChild(elm.childNodes.item(0));
     }
@@ -219,10 +276,7 @@
     gettingLocation.then((results)=>{
       if(results["location"]!=undefined){
         location=results["location"];
-        hutteNippon.prefecture=location["prefecture"];
-        hutteNippon.region=location["region"];
-        console.log(hutteNippon.prefecture);
-        console.log(hutteNippon.region);
+        hutteNippon.prefecture=pref[location["prefecture"]];
         dispLocationButtonLavel();
         getWeatherXMLFile();
       }else{
@@ -274,64 +328,10 @@
     });
   }
 
-  function openRadar(){
-    var urlRadar = chrome.extension.getURL("popup/radar.html");
-    var creating = chrome.windows.create({
-      url:    urlRadar,
-      type:   "popup",
-      height: 560,
-      width:  586
-    },(win)=>{
-      console.log("radar windowId : "+win.id);
-    });
-  }
-
-  function openThunder(){
-    var urlThunder = chrome.extension.getURL("popup/thunder.html");
-    var creating = chrome.windows.create({
-      url:    urlThunder,
-      type:   "popup",
-      height: 560,
-      width:  586
-    },(win)=>{
-      console.log("thunder windowId : "+win.id);
-    });
-  }
-
-  function openTornade(){
-    var urlTornade = chrome.extension.getURL("popup/tornade.html");
-    var creating = chrome.windows.create({
-      url:    urlTornade,
-      type:   "popup",
-      height: 560,
-      width:  586
-    },(win)=>{
-      console.log("tornade windowId : "+win.id);
-    });
-  }
-
-  function openWarn(){
-    var urlWarn = chrome.extension.getURL("popup/warn.html");
-    var creating = chrome.windows.create({
-      url:    urlWarn,
-      type:   "popup",
-      height: 628,
-      width:  576
-    },(win)=>{
-      console.log("warn windowId : "+win.id);
-    });
-  }
-
   chrome.runtime.onMessage.addListener(
     function(request,sender,sendResponse){
-      console.log(sender);
-      console.log(request);
       var t;
       var overallURL = chrome.extension.getURL("popup/overall.html");
-      var radarURL = chrome.extension.getURL("popup/radar.html");
-      var thunderURL = chrome.extension.getURL("popup/thunder.html");
-      var tornadeURL = chrome.extension.getURL("popup/tornade.html");
-      var warnURL = chrome.extension.getURL("popup/warn.html");
 
       if(sender.url==overallURL){
         if(request.request=="send overall"){
@@ -341,28 +341,9 @@
           return true;
         }
         return true;
-      }else if(sender.url==radarURL){
-        if(request.request=="send region"){
-          sendResponse(hutteNippon.region);
-          return true;
-        }
-      }else if(sender.url==thunderURL){
-        if(request.request=="send region"){
-          sendResponse(hutteNippon.region);
-          return true;
-        }
-      }else if(sender.url==tornadeURL){
-        if(request.request=="send region"){
-          sendResponse(hutteNippon.region);
-          return true;
-        }
-      }else if(sender.url==warnURL){
-        if(request.request=="send region"){
-          sendResponse(hutteNippon.region);
-          return true;
-        }
       }
-    });
+    }
+  );
 
   function init() {
     browser.windows.onRemoved.addListener((windowId) => {

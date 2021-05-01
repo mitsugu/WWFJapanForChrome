@@ -1,24 +1,20 @@
-#main_box {
+body {
   padding:0.5em;
   background-color:#f2f1f0;
 }
-#prefecture_box {
-  float:left;
-  padding:0.5em;
+#main_box{
+  display:flex;
+  flex-flow:column;
 }
-#region_box {
-  float:left;
-  padding:0.5em;
+#prefecture_box {
+  display:flex;
+  flex-flow:column;
+}
+#button_box{
+  padding:0.5em 0em 0em 0em;
+  display:flex;
+  justify-content:right;
 }
 .item_name {
   margin:0em 0.5em 0.5em 0.5em;
-}
-#pref_list {
-}
-#reg_list {
-}
-
-#button_box{
-  padding:05em 0em 0em 0em;
-  text-align:right;
 }
