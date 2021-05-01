@@ -376,16 +376,7 @@
     console.log('init Main Window');
     document.getElementById('close_button').addEventListener('click',closeWin);
     document.getElementById('locationButton').addEventListener('click',selectLocation);
-    document.getElementById('overall_button')
-        .addEventListener("click",openOverall);
-    document.getElementById('map_button').addEventListener("click",openMap);
-    document.getElementById('photo_button').addEventListener("click",openPhoto);
-    document.getElementById('radar_button').addEventListener("click",openRadar);
-    document.getElementById('thunder_button')
-        .addEventListener("click",openThunder);
-    document.getElementById('tornade_button')
-        .addEventListener("click",openTornade);
-    document.getElementById('warn_button').addEventListener("click",openWarn);
+    document.getElementById('overall_button').addEventListener("click",openOverall);
     getLocation();
   }
   window.addEventListener('DOMContentLoaded',init);

@@ -8,8 +8,8 @@
     var creating = browser.windows.create({
       url:    mainURL,
       type:   "popup",
-      height: 346,
-      width:  570
+      height: 392,
+      width:  1024
     });
     creating.then((win)=>{
       console.log("Main windowId : "+win.id);

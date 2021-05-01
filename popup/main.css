@@ -1,33 +1,44 @@
 #main_box{
-  margin:0.5em 0.5em 0.5em 0.5em;
+  margin:1em 1em 1em 1em;
   background-color:#f2f1f0;
 }
+#head_box{
+  display:flex;
+  justify-content:space-between;
+}
+#contents_box {
+  display:flex;
+  justify-content:space-between;
+}
+#weather_box{
+  display:flex;
+  flex-flow:column;
+}
+#button_box{
+  margin-top:1em;
+  margin-left:1em;
+  width:150px;
+  display:flex;
+  flex-flow:column;
+}
+
 #locationButton{
   margin-bottom:0.5em;
   font-weight:bold;
-}
-#weather_box{
-  float:left;
-}
-.half_week_box{
-  clear:both;
-  border-width:1px;
-  border-style:solid;
-  width:408px;
-  height:138px;
-  margin: 0em 0.5em 0.5em 0em
-}
-.first_day_box{
-  width:101px;
-  height:138px;
-  float:left;
 }
 .day_box{
   width:101px;
   height:138px;
   float:left;
   border-width:1px;
-  border-left-style:solid;
+  border-style:solid none solid solid;
+}
+.last_day_box{
+  width:101px;
+  height:138px;
+  float:left;
+  border-width:1px;
+  border-style:solid solid solid solid;
 }
 #day0 {
   background-color:#ffffff;
@@ -73,17 +84,10 @@
   align-items:center;
   justify-content:center;
 }
-#button_box{
-  float:left;
-  width:101px;
-}
 .menu_button{
   width:134px;
   text-align:center;
 }
-#close_box{
-  padding-top:2.0em;
-}
-#close_button{
-  width:134px;
+.region_title{
+  margin-left:2em;
 }
