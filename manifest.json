@@ -26,8 +26,6 @@
   "permissions": [
     "https://www.jma.go.jp/",
     "http://www.jma.go.jp/",
-    "http://feeds.feedburner.com/",
-    "http://feedproxy.google.com/",
     "storage",
     "tabs",
     "contextMenus"
