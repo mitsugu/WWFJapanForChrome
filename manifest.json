@@ -26,6 +26,7 @@
   "permissions": [
     "https://www.jma.go.jp/",
     "http://www.jma.go.jp/",
+    "http://www.data.jma.go.jp",
     "storage",
     "tabs",
     "contextMenus"
