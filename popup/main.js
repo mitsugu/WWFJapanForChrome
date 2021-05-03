@@ -109,6 +109,20 @@
   };
   // }}}
 
+  function evaluateXPath(aNode, aExpr) {
+    // {{{
+    var xpe = new XPathEvaluator();
+    var nsResolver = xpe.createNSResolver(aNode.ownerDocument == null ?
+      aNode.documentElement : aNode.ownerDocument.documentElement);
+    var result = xpe.evaluate(aExpr, aNode, nsResolver, 0, null);
+    var found = [];
+    var res;
+    while (res = result.iterateNext())
+      found.push(res);
+    return found;
+    // }}}
+  }
+
   function selectLocation(){
     // {{{
     var locationURL = browser.extension.getURL("popup/location.html");
@@ -232,36 +246,18 @@
 
   function clearContentsWeather(){
     // {{{
-    var id;
-    var pNode;
-    for(var i=0;i<8;i++){
-      id="day"+i;
-      // 日付クリア
-      pNode=document.getElementById(id).childNodes.item(1).childNodes.item(1)
-      if(0<pNode.childNodes.length){
-        pNode.removeChild(pNode.firstChild);
-      }
-      // 天気クリア
-      pNode=document.getElementById(id).childNodes.item(3).childNodes.item(1);
-      if(0<pNode.childNodes.length){
-        pNode.removeChild(pNode.firstChild);
-      }
-      pNode=document.getElementById(id).childNodes.item(3).childNodes.item(4);
-      pNode.setAttribute("src","");
-      // 気温クリア
-      pNode=document.getElementById(id).childNodes.item(5).childNodes.item(1);
-      if(0<pNode.childNodes.length){
-        pNode.removeChild(pNode.firstChild);
-      }
-      pNode=document.getElementById(id).childNodes.item(5).childNodes.item(5);
-      if(0<pNode.childNodes.length){
-        pNode.removeChild(pNode.firstChild);
-      }
-      // 降水確率クリア
-      pNode=document.getElementById(id).childNodes.item(7).childNodes.item(1);
-      if(0<pNode.childNodes.length){
-        pNode.removeChild(pNode.firstChild);
-      }
+    let strXPath;
+    let originNode = [];
+
+    for (var i=0; i<16; i++) {
+      strXPath = '//div[@id="day'+i+'"]';
+      originNode = evaluateXPath(document, strXPath);
+      originNode[0].childNodes[1].childNodes[1].textContent = "";   // 日付
+      originNode[0].childNodes[3].childNodes[1].textContent = "";   // 天気文字列
+                                                                    // 天気アイコン
+      originNode[0].childNodes[3].childNodes[4].setAttribute("src", "");
+      originNode[0].childNodes[5].childNodes[3].textContent = "/";  // 温度
+      originNode[0].childNodes[7].childNodes[1].textContent = "";   // 降水確率
     }
     // }}}
   }
@@ -273,6 +269,7 @@
         let parser=new DOMParser();
         hutteNippon.dailyXMLDoc =
             parser.parseFromString(response.xmldoc,"application/xml");
+        clearContentsWeather();
       }
     );
     // }}}
