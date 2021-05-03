@@ -1,9 +1,46 @@
 (function(){
-  var windowId;
-  var weatherXMLData;
-  const endPointAtom='http://www.data.jma.go.jp/developer/xml/feed/regular.xml';
+  let windowId;
+  let weatherXMLData;
+  let jmaRegularXML;
+  let jmaRegularLXML;
+  const mainURL = chrome.extension.getURL("popup/main.html");
+  const urlJmaRegular = 'https://www.data.jma.go.jp/developer/xml/feed/regular.xml';
+  const urlJmaRegularL = 'https://www.data.jma.go.jp/developer/xml/feed/regular_l.xml';
+  let urlJmaDaily;
+  let urlJmaWeekly;
+  let jmaDailyXML;
+  let jmaWeeklyXML;
+  let codePrefecture;
+
+  function evaluateXPath(aNode, aExpr) {
+    // {{{
+    // var elms=evaluateXPath(documentNode, '//myns:entry');
+    // See URL for xpath expressions
+    // https://developer.mozilla.org/ja/docs/Web/XPath/Introduction_to_using_XPath_in_JavaScript#xml_.e6.96.87.e6.9b.b8.e3.81.ae.e3.83.87.e3.83.95.e3.82.a9.e3.83.ab.e3.83.88.e5.90.8d.e5.89.8d.e7.a9.ba.e9.96.93.e3.82.92.e5.ae.9f.e8.a3.85.e3.81.99.e3.82.8b
+    var resolver = function() {
+      return 'http://www.w3.org/2005/Atom';
+    };
+    //var xpe = new XPathEvaluator();
+    //var result = xpe.evaluate(
+    var result = aNode.evaluate(
+      aExpr,
+      aNode,
+      resolver,
+      XPathResult.ANY_TYPE,
+      null
+    );
+
+    var found = [];
+    var res;
+    while (res = result.iterateNext()){
+      found.push(res);
+    }
+    return found;
+    // }}}
+  }
 
   browser.browserAction.onClicked.addListener((tab)=>{
+    // {{{
     var mainURL = browser.extension.getURL("popup/main.html");
     var creating = browser.windows.create({
       url:    mainURL,
@@ -12,59 +49,98 @@
       width:  1024
     });
     creating.then((win)=>{
-      console.log("Main windowId : "+win.id);
     },(result)=>{
       console.log("Main Window Create Error");
     });
-  });
+    // }}}
+  })
 
-  function getWeatherXMLFile(region,sendResponse){
+  /*
+  function getWeatherXMLFile(pPref,sendResponse){
+    // {{{
     var uri=endPointRss+hLocationCode[region];
     console.log(uri);
     weatherXMLData=new XMLHttpRequest();
     weatherXMLData.open('GET',uri);
     weatherXMLData.onreadystatechange=function(){
       if (weatherXMLData.readyState == 4 && weatherXMLData.status == 200){
-        console.log(weatherXMLData.responseXML);
-        sendResponse({xmldoc:weatherXMLData.responseText});
+//        sendResponse({xmldoc:weatherXMLData.responseText});
       }
     }
     weatherXMLData.send(null);
-  };
+    // }}}
+  }
+  */
 
-  function getRadarJs(sendResponse){
-    const uri='http://www.jma.go.jp/jp/radnowc/hisjs/radar.js';
-    var response=new XMLHttpRequest();
-    response.open('GET',uri);
-    response.onreadystatechange=function(){
-      if (response.readyState == 4 && response.status == 200){
-        console.log(response.responseText);
-        sendResponse(response.responseText);
+  function getDailyXML(sendResponse){
+    // {{{
+    jmaDailyXML= new XMLHttpRequest();
+    jmaDailyXML.open('GET',urlJmaDaily);
+    jmaDailyXML.onreadystatechange=function(){
+      if (jmaDailyXML.readyState == 4 && jmaDailyXML.status == 200){
+        sendResponse({xmldoc:jmaDailyXML.responseText});
       }
     }
-    response.send(null);
+    jmaDailyXML.send(null);
+    // }}}
+  }
+
+  function getUrlJmaRegularL(sendResponse){
+    // {{{
+    jmaRegularXML=new XMLHttpRequest();
+    jmaRegularXML.open('GET',urlJmaRegular);
+    jmaRegularXML.onreadystatechange=function(){
+      if (jmaRegularXML.readyState == 4 && jmaRegularXML.status == 200){
+        let strExp='//myns:id[contains(text(),"_VPFW50_'
+                    + codePrefecture
+                    + '") and contains(text(),"'
+                    + strDate
+                    + '")]/../myns:link';
+        let elms = evaluateXPath(jmaRegularXML.responseXML, strExp);
+      }
+    }
+    jmaRegularXML.send(null);
+    // }}}
+  }
+
+  function getUrlJmaRegular(sendResponse){
+    // {{{
+    console.log('Regular');
+    jmaRegularXML=new XMLHttpRequest();
+    jmaRegularXML.open('GET',urlJmaRegularL);
+    jmaRegularXML.onreadystatechange=function(){
+      if (jmaRegularXML.readyState == 4 && jmaRegularXML.status == 200){
+        let date= new Date();
+        let strDate = date.getFullYear()
+                      + ('0' + (date.getMonth() + 1)).slice(-2)
+                      + ('0' + date.getDate()).slice(-2);
+        let strExp  = '//myns:link[contains(@href,"'
+                    + strDate
+                    + '") and contains(@href,"_VPFD50_") and contains(@href,"'
+                    + codePrefecture
+                    + '")]';
+        let elms = evaluateXPath(jmaRegularXML.responseXML, strExp);
+        if(elms.length) {
+          urlJmaDaily = elms[0].getAttribute('href');
+          getDailyXML(sendResponse);
+        }
+      }
+    }
+    jmaRegularXML.send(null);
+    // }}}
   }
 
   chrome.runtime.onMessage.addListener(
     function(request,sender,sendResponse){
-      console.log(sender);
-      var mainURL = chrome.extension.getURL("popup/main.html");
-      var radarURL = chrome.extension.getURL("popup/radar.html");
-      var thunderURL = chrome.extension.getURL("popup/thunder.html");
-      var tornadeURL = chrome.extension.getURL("popup/tornade.html");
-      var warnURL = chrome.extension.getURL("popup/warn.html");
-
-      if(sender.url==mainURL){
-        getWeatherXMLFile(request.region,sendResponse);
-        return true;
-      }else if(sender.url==radarURL){
-        if(request.request=="send radar.js"){
-          getRadarJs(sendResponse);
-          return true;
-        }
+      if(request.command == "getDaily") {
+        codePrefecture = request.prefecture;
+        getUrlJmaRegular(sendResponse);
       }
+      return true;
     }
   );
+  //{{{
+  /*
   chrome.windows.getCurrent({populate: true},function(win){
     windowId=win.id;
     createContextMenu();
@@ -104,4 +180,6 @@
       }
     });
   }
+  */
+  //}}}
 })();

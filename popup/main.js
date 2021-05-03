@@ -1,8 +1,11 @@
 (function(){
+  var overallURL = chrome.extension.getURL("popup/overall.html");
   var hutteNippon={};
   hutteNippon.prefecture="";    // 都道府県
-  hutteNippon.weatherXMLDoc={}; // 週間天気予報 RSS
+  hutteNippon.dailyXMLDoc = {}; // 府県天気予報 XML
+  hutteNippon.weatherXMLDoc={}; // 府県週間天気予報 XML
   var idWinLocation;
+  // {{{
   const pref = {
     "010000" : "気象庁",
     "011000" : "北海道 宗谷地方",
@@ -104,8 +107,10 @@
     '雪のちくもり':'413.png',
     '雪のち雨':'414.png'
   };
+  // }}}
 
   function selectLocation(){
+    // {{{
     var locationURL = browser.extension.getURL("popup/location.html");
     var creating = browser.windows.create({
       url:        locationURL,
@@ -118,20 +123,22 @@
     },(result)=>{
       console.log("Location Window Open Error");
     });
+    // }}}
   }
 
   function dispLocationButtonLavel(){
+    // {{{
     var elm=document.getElementById('locationButton');
-    var textNode=document.createTextNode(
-      hutteNippon.prefecture+"の週間天気予報");
+    var textNode=document.createTextNode(hutteNippon.prefecture+"の週間天気予報");
     if(elm.childNodes.length>0){
       elm.removeChild(elm.childNodes.item(0));
     }
     elm.appendChild(textNode);
-
+    // }}}
   }
 
   function dispContentsWeather(xmldoc){
+    // {{{
     var id;
     var probs;
     var forecasts=xmldoc.getElementsByTagName('wm:forecast');
@@ -220,9 +227,11 @@
         pNode.appendChild(document.createTextNode(p));
       }
     }
+    // }}}
   }
 
   function clearContentsWeather(){
+    // {{{
     var id;
     var pNode;
     for(var i=0;i<8;i++){
@@ -230,13 +239,11 @@
       // 日付クリア
       pNode=document.getElementById(id).childNodes.item(1).childNodes.item(1)
       if(0<pNode.childNodes.length){
-        console.log(pNode.childNodes.item(0));
         pNode.removeChild(pNode.firstChild);
       }
       // 天気クリア
       pNode=document.getElementById(id).childNodes.item(3).childNodes.item(1);
       if(0<pNode.childNodes.length){
-        console.log(pNode.childNodes.item(0));
         pNode.removeChild(pNode.firstChild);
       }
       pNode=document.getElementById(id).childNodes.item(3).childNodes.item(4);
@@ -244,33 +251,35 @@
       // 気温クリア
       pNode=document.getElementById(id).childNodes.item(5).childNodes.item(1);
       if(0<pNode.childNodes.length){
-        console.log(pNode.childNodes.item(0));
         pNode.removeChild(pNode.firstChild);
       }
       pNode=document.getElementById(id).childNodes.item(5).childNodes.item(5);
       if(0<pNode.childNodes.length){
-        console.log(pNode.childNodes.item(0));
         pNode.removeChild(pNode.firstChild);
       }
       // 降水確率クリア
       pNode=document.getElementById(id).childNodes.item(7).childNodes.item(1);
       if(0<pNode.childNodes.length){
-        console.log(pNode.childNodes.item(0));
         pNode.removeChild(pNode.firstChild);
       }
     }
+    // }}}
   }
 
-  function getWeatherXMLFile(){
-    chrome.runtime.sendMessage({region:hutteNippon.region},function (response) {
-      var parser=new DOMParser();
-      hutteNippon.weatherXMLDoc=parser.parseFromString(response.xmldoc,"application/xml");
-      clearContentsWeather();
-      dispContentsWeather(hutteNippon.weatherXMLDoc);
-    });
+  function getDailyXMLFile(pPref){
+    // {{{
+    chrome.runtime.sendMessage({command:"getDaily",prefecture:pPref},
+      function (response) {
+        let parser=new DOMParser();
+        hutteNippon.dailyXMLDoc =
+            parser.parseFromString(response.xmldoc,"application/xml");
+      }
+    );
+    // }}}
   }
 
   function getLocation() {
+    // {{{
     var location;
     var gettingLocation=browser.storage.local.get("location");
     gettingLocation.then((results)=>{
@@ -278,7 +287,7 @@
         location=results["location"];
         hutteNippon.prefecture=pref[location["prefecture"]];
         dispLocationButtonLavel();
-        getWeatherXMLFile();
+        getDailyXMLFile(location["prefecture"]);
       }else{
         console.log("not found location");
         selectLocation();
@@ -286,6 +295,7 @@
     },(results)=>{
       console.log("can't get Location");
     });
+    // }}}
   }
 
   function closeWin(){
@@ -293,6 +303,7 @@
   }
 
   function openOverall(){
+    // {{{
     var urlAverall = chrome.extension.getURL("popup/overall.html");
     var creating = chrome.windows.create({
       url:    urlAverall,
@@ -300,11 +311,12 @@
       height: 322,
       width:  448
     },(win)=>{
-      console.log("Overall windowId : "+win.id);
     });
+    // }}}
   }
 
   function openMap(){
+    // {{{
     var urlMap = chrome.extension.getURL("popup/map.html");
     var creating = chrome.windows.create({
       url:    urlMap,
@@ -312,11 +324,12 @@
       height: 664,
       width:  634
     },(win)=>{
-      console.log("Map windowId : "+win.id);
     });
+    // }}}
   }
 
   function openPhoto(){
+    // {{{
     var urlPhoto = chrome.extension.getURL("popup/photo.html");
     var creating = chrome.windows.create({
       url:    urlPhoto,
@@ -324,14 +337,14 @@
       height: 860,
       width:  1088
     },(win)=>{
-      console.log("Photo windowId : "+win.id);
     });
+    // }}}
   }
 
   chrome.runtime.onMessage.addListener(
+    // {{{
     function(request,sender,sendResponse){
       var t;
-      var overallURL = chrome.extension.getURL("popup/overall.html");
 
       if(sender.url==overallURL){
         if(request.request=="send overall"){
@@ -343,22 +356,23 @@
         return true;
       }
     }
+    // }}}
   );
 
   function init() {
+    // {{{
     browser.windows.onRemoved.addListener((windowId) => {
       browser.windows.onRemoved.removeListener(function(){
         console.log('remove window remove lisener');
       });
-      console.log("Closed window: "+windowId);
       if(windowId==idWinLocation) getLocation();
 
     });
-    console.log('init Main Window');
     document.getElementById('close_button').addEventListener('click',closeWin);
     document.getElementById('locationButton').addEventListener('click',selectLocation);
     document.getElementById('overall_button').addEventListener("click",openOverall);
     getLocation();
+    // }}}
   }
   window.addEventListener('DOMContentLoaded',init);
 })();
