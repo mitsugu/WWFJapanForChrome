@@ -1,14 +1,14 @@
 (function(){
+  const mainURL = chrome.extension.getURL("popup/main.html");
+  const urlJmaRegular = 'https://www.data.jma.go.jp/developer/xml/feed/regular.xml';
+  const urlJmaRegularL = 'https://www.data.jma.go.jp/developer/xml/feed/regular_l.xml';
   let windowId;
   let weatherXMLData;
   let jmaRegularXML;
   let jmaRegularLXML;
-  const mainURL = chrome.extension.getURL("popup/main.html");
-  const urlJmaRegular = 'https://www.data.jma.go.jp/developer/xml/feed/regular.xml';
-  const urlJmaRegularL = 'https://www.data.jma.go.jp/developer/xml/feed/regular_l.xml';
   let urlJmaDaily;
-  let urlJmaWeekly;
   let jmaDailyXML;
+  let urlJmaWeekly;
   let jmaWeeklyXML;
   let codePrefecture;
 
@@ -120,9 +120,22 @@
                     + codePrefecture
                     + '")]';
         let elms = evaluateXPath(jmaRegularXML.responseXML, strExp);
+        if(!elms.length) { // 当日の府県天気予報がまだ未発表のとき
+          strDate = date.getFullYear()
+                  + ('0' + (date.getMonth() + 1)).slice(-2)
+                  + ('0' + (date.getDate()-1)).slice(-2);
+          strExp  = '//myns:link[contains(@href,"'
+                  + strDate
+                  + '") and contains(@href,"_VPFD50_") and contains(@href,"'
+                  + codePrefecture
+                  + '")]';
+          elms = evaluateXPath(jmaRegularXML.responseXML, strExp);
+        }
         if(elms.length) {
           urlJmaDaily = elms[0].getAttribute('href');
           getDailyXML(sendResponse);
+        } else {
+          console.log('府県予報未発表');
         }
       }
     }
