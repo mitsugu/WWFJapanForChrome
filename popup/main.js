@@ -339,6 +339,22 @@
     // }}}
   }
 
+  function openHtb(){
+    // {{{
+    chrome.runtime.sendMessage({command:"htb"},
+      function (response) {}
+    );
+    // }}}
+  }
+
+  function openJma(){
+    // {{{
+    chrome.runtime.sendMessage({command:"jma"},
+      function (response) {}
+    );
+    // }}}
+  }
+
   chrome.runtime.onMessage.addListener(
     // {{{
     function(request,sender,sendResponse){
@@ -371,6 +387,8 @@
     document.getElementById('overall_button').addEventListener("click",openOverall);
     document.getElementById('map_button').addEventListener("click",openMap);
     document.getElementById('satellite_button').addEventListener("click",openSatellite);
+    document.getElementById('jma_button').addEventListener("click",openJma);
+    document.getElementById('htb_button').addEventListener("click",openHtb);
     getLocation();
     // }}}
   }

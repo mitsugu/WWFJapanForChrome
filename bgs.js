@@ -143,56 +143,40 @@
     // }}}
   }
 
+  function openHtb() {
+    // {{{
+    chrome.tabs.create(
+      {"url":"https://www.hbc.co.jp/weather/pro-weather.html","windowId":windowId},
+      function (tabs){}
+    );
+    // }}}
+  }
+
+  function openJma() {
+    // {{{
+    chrome.tabs.create(
+      {"url":"https://www.jma.go.jp/jma/index.html","windowId":windowId},
+      function (tabs){}
+    );
+    // }}}
+  }
+
   chrome.runtime.onMessage.addListener(
     function(request,sender,sendResponse){
       if(request.command == "getDaily") {
         codePrefecture = request.prefecture;
         getUrlJmaRegular(sendResponse);
+      } else if (request.command == "jma" ) {
+        openJma();
+      } else if (request.command == "htb" ) {
+        openHtb();
       }
       return true;
     }
   );
-  //{{{
-  /*
+
   chrome.windows.getCurrent({populate: true},function(win){
     windowId=win.id;
-    createContextMenu();
   });
-  function createContextMenu(){
-    var parentId= chrome.contextMenus.create({
-      "title":"Hütte Nippon Origin",
-      "type":"normal",
-      "contexts":["all"],
-      "documentUrlPatterns":[chrome.extension.getURL("popup/main.html")]
-    });
-    chrome.contextMenus.create({
-      "title":"気象庁",
-      "type":"normal",
-      "parentId":parentId,
-      "contexts":["all"],
-      "onclick":function(){
-        console.log(chrome.extension.getURL("popup/main.html"));
-        var url="https://www.jma.go.jp/jma/index.html";
-        console.log(url);
-        chrome.tabs.create({"url":url,windowId:windowId},function (tabs){
-          console.log(tabs);
-        });
-      }
-    });
-    chrome.contextMenus.create({
-      "title":"HBC 専門天気図",
-      "type":"normal",
-      "parentId":parentId,
-      "contexts":["all"],
-      "onclick":function(){
-        var url="https://www.hbc.co.jp/weather/pro-weather.html";
-        console.log(url);
-        chrome.tabs.create({"url":url,windowId:windowId},function (tabs){
-            console.log(tabs);
-        });
-      }
-    });
-  }
-  */
   //}}}
 })();
