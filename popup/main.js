@@ -318,21 +318,22 @@
     var creating = chrome.windows.create({
       url:    urlMap,
       type:   "popup",
-      height: 664,
-      width:  634
+      height: 528,
+      width:  640
     },(win)=>{
     });
     // }}}
   }
 
-  function openPhoto(){
+  function openSatellite(){
     // {{{
-    var urlPhoto = chrome.extension.getURL("popup/photo.html");
+    // open https://forecast.weathermap.jp/public_datas/SAT/IR-FL_P3-600m.jpg
+    var urlSatellite = chrome.extension.getURL("popup/satellite.html");
     var creating = chrome.windows.create({
-      url:    urlPhoto,
+      url:    urlSatellite,
       type:   "popup",
-      height: 860,
-      width:  1088
+      height: 528,
+      width:  640
     },(win)=>{
     });
     // }}}
@@ -368,6 +369,8 @@
     document.getElementById('close_button').addEventListener('click',closeWin);
     document.getElementById('locationButton').addEventListener('click',selectLocation);
     document.getElementById('overall_button').addEventListener("click",openOverall);
+    document.getElementById('map_button').addEventListener("click",openMap);
+    document.getElementById('satellite_button').addEventListener("click",openSatellite);
     getLocation();
     // }}}
   }
