@@ -2,8 +2,7 @@
   var overallURL = chrome.extension.getURL("popup/overall.html");
   var hutteNippon={};
   hutteNippon.prefecture="";    // 都道府県
-  hutteNippon.dailyXMLDoc = {}; // 府県天気予報 XML
-  hutteNippon.weatherXMLDoc={}; // 府県週間天気予報 XML
+  hutteNippon.weatherData = {}; // 府県天気予報 XML
   var idWinLocation;
   // {{{
   const pref = {
@@ -14,7 +13,7 @@
     "014100" : "北海道 釧路・根室・十勝地方",
     "015000" : "北海道 胆振・日高地方",
     "016000" : "北海道 石狩・空知・後志地方",
-    "017000" : "北海道渡島・檜山地方",
+    "017000" : "北海道 渡島・檜山地方",
     "020000" : "青森県",
     "030000" : "岩手県",
     "040000" : "宮城県",
@@ -262,13 +261,11 @@
     // }}}
   }
 
-  function getDailyXMLFile(pPref){
+  function getWeatherData(pPref){
     // {{{
-    chrome.runtime.sendMessage({command:"getDaily",prefecture:pPref},
+    chrome.runtime.sendMessage({command:"getWeather",prefecture:pPref},
       function (response) {
-        let parser=new DOMParser();
-        hutteNippon.dailyXMLDoc =
-            parser.parseFromString(response.xmldoc,"application/xml");
+        hutteNippon.weatherData = JSON.parse(response.doc);
         clearContentsWeather();
       }
     );
@@ -284,7 +281,7 @@
         location=results["location"];
         hutteNippon.prefecture=pref[location["prefecture"]];
         dispLocationButtonLavel();
-        getDailyXMLFile(location["prefecture"]);
+        getWeatherData(location["prefecture"]);
       }else{
         console.log("not found location");
         selectLocation();
@@ -296,7 +293,9 @@
   }
 
   function closeWin(){
+    // {{{
     window.close();
+    // }}}
   }
 
   function openOverall(){
@@ -341,29 +340,22 @@
 
   function openHtb(){
     // {{{
-    chrome.runtime.sendMessage({command:"htb"},
-      function (response) {}
-    );
+    chrome.runtime.sendMessage({command:"htb"}, function (response){});
     // }}}
   }
 
   function openJma(){
     // {{{
-    chrome.runtime.sendMessage({command:"jma"},
-      function (response) {}
-    );
+    chrome.runtime.sendMessage({command:"jma"}, function (response){});
     // }}}
   }
 
   chrome.runtime.onMessage.addListener(
     // {{{
     function(request,sender,sendResponse){
-      var t;
-
       if(sender.url==overallURL){
         if(request.request=="send overall"){
-          t=hutteNippon.weatherXMLDoc.getElementsByTagName('item').item(1)
-              .getElementsByTagName('description').item(0).childNodes.item(0).nodeValue;
+          let t = hutteNippon.weatherData.overall;
           sendResponse(t);
           return true;
         }

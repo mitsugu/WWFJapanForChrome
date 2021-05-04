@@ -6,19 +6,47 @@
   let weatherXMLData;
   let jmaRegularXML;
   let jmaRegularLXML;
+  let urlJmaOverall;
+  let jmaOverallXML;
   let urlJmaDaily;
   let jmaDailyXML;
   let urlJmaWeekly;
   let jmaWeeklyXML;
-  let codePrefecture;
+  let storeSendResponse;
 
-  function evaluateXPath(aNode, aExpr) {
+  // 日毎府県天気予報データ
+  let day = {
+    date    : "", // 日付
+    weather : "", // 天気文字列
+    wcode   : "", // 天気コード
+    temp    : [], // 最高気温/最低気温
+    prob    : []  // 降水確率
+  };
+
+  // 段毎天気予報データ
+  let step = {
+    region  : "", // 地方(ex. 北部、南部等
+    days    : []  // 日別府県天気予報データ
+  };
+
+  // 府県天気予報
+  let forecast = {
+    prefecture : "",  // 地域コード
+    overall    : "",  // 府県天気概況
+    steps      : []   // 段別天気予報データ
+  };
+
+  function evaluateXPath(prefix, aNode, aExpr) {
     // {{{
     // var elms=evaluateXPath(documentNode, '//myns:entry');
     // See URL for xpath expressions
-    // https://developer.mozilla.org/ja/docs/Web/XPath/Introduction_to_using_XPath_in_JavaScript#xml_.e6.96.87.e6.9b.b8.e3.81.ae.e3.83.87.e3.83.95.e3.82.a9.e3.83.ab.e3.83.88.e5.90.8d.e5.89.8d.e7.a9.ba.e9.96.93.e3.82.92.e5.ae.9f.e8.a3.85.e3.81.99.e3.82.8b
-    var resolver = function() {
-      return 'http://www.w3.org/2005/Atom';
+    // https://developer.mozilla.org/ja/docs/Web/XPath/Introduction_to_using_XPath_in_JavaScript#implementing_a_user_defined_namespace_resolver
+    var resolver = function(prefix) {
+      var ns = {
+        'regular' : 'http://www.w3.org/2005/Atom',
+        'overall' : 'http://xml.kishou.go.jp/jmaxml1/body/meteorology1/'
+      };
+      return ns[prefix] || null;
     };
     //var xpe = new XPathEvaluator();
     //var result = xpe.evaluate(
@@ -39,52 +67,118 @@
     // }}}
   }
 
-  browser.browserAction.onClicked.addListener((tab)=>{
+  function sendJSON() {
     // {{{
-    var mainURL = browser.extension.getURL("popup/main.html");
-    var creating = browser.windows.create({
-      url:    mainURL,
-      type:   "popup",
-      height: 392,
-      width:  1024
-    });
-    creating.then((win)=>{
-    },(result)=>{
-      console.log("Main Window Create Error");
-    });
-    // }}}
-  })
-
-  /*
-  function getWeatherXMLFile(pPref,sendResponse){
-    // {{{
-    var uri=endPointRss+hLocationCode[region];
-    console.log(uri);
-    weatherXMLData=new XMLHttpRequest();
-    weatherXMLData.open('GET',uri);
-    weatherXMLData.onreadystatechange=function(){
-      if (weatherXMLData.readyState == 4 && weatherXMLData.status == 200){
-//        sendResponse({xmldoc:weatherXMLData.responseText});
-      }
-    }
-    weatherXMLData.send(null);
+    storeSendResponse({doc:JSON.stringify(forecast)});
     // }}}
   }
-  */
 
-  function getDailyXML(sendResponse){
+  function set2DayWeater() {
+    // {{{
+    let doc = jmaDailyXML.responseXML;
+    sendJSON();
+    // }}}
+  }
+
+  function getDailyXML(){
     // {{{
     jmaDailyXML= new XMLHttpRequest();
     jmaDailyXML.open('GET',urlJmaDaily);
     jmaDailyXML.onreadystatechange=function(){
       if (jmaDailyXML.readyState == 4 && jmaDailyXML.status == 200){
-        sendResponse({xmldoc:jmaDailyXML.responseText});
+        set2DayWeater();
       }
     }
     jmaDailyXML.send(null);
     // }}}
   }
 
+  function getUrlDaily(){
+    // {{{
+    let ret = false;
+    let date= new Date();
+    let strDate = date.getFullYear()
+                  + ('0' + (date.getMonth() + 1)).slice(-2)
+                  + ('0' + date.getDate()).slice(-2);
+    let strExp  = '//myns:link[contains(@href,"'
+                + strDate
+                + '") and contains(@href,"_VPFD50_") and contains(@href,"'
+                + forecast.prefecture
+                + '")]';
+    let elms = evaluateXPath(jmaRegularXML.responseXML, strExp);
+    if(!elms.length) { // 当日の府県天気予報がまだ未発表のとき
+      strDate = date.getFullYear()
+              + ('0' + (date.getMonth() + 1)).slice(-2)
+              + ('0' + (date.getDate()-1)).slice(-2);
+      strExp  = '//myns:link[contains(@href,"'
+              + strDate
+              + '") and contains(@href,"_VPFD50_") and contains(@href,"'
+              + forecast.prefecture
+              + '")]';
+      elms = evaluateXPath(jmaRegularXML.responseXML, strExp);
+    }
+    if(elms.length) {
+      ret = elms[0].getAttribute('href');
+    }
+    return ret;
+    // }}}
+  }
+
+  function setOverall() {
+    // {{{
+    let doc     = jmaOverallXML.responseXML;
+    let strExp  = '//overall:Text[@type="本文"]/text()';
+    let elms    = evaluateXPath('overall', doc, strExp);
+    forecast.overall = elms[0].nodeValue;
+    sendJSON();
+    // }}}
+  }
+
+  function getOverallXML(){
+    // {{{
+    jmaOverallXML = new XMLHttpRequest();
+    jmaOverallXML.open('GET',urlJmaOverall);
+    jmaOverallXML.onreadystatechange=function(){
+      if (jmaOverallXML.readyState == 4 && jmaOverallXML.status == 200){
+        setOverall();
+      }
+    }
+    jmaOverallXML.send(null);
+    // }}}
+  }
+
+  function getUrlOverall(){
+    // {{{
+    let ret = false;
+    let date= new Date();
+    let strDate = date.getFullYear()
+                  + ('0' + (date.getMonth() + 1)).slice(-2)
+                  + ('0' + date.getDate()).slice(-2);
+    let strExp  = '//regular:link[contains(@href,"'
+                + strDate
+                + '") and contains(@href,"_VPFG50_") and contains(@href,"'
+                + forecast.prefecture
+                + '")]';
+    let elms = evaluateXPath('regular', jmaRegularXML.responseXML, strExp);
+    if(!elms.length) { // 当日の府県天気概況がまだ未発表のとき
+      strDate = date.getFullYear()
+              + ('0' + (date.getMonth() + 1)).slice(-2)
+              + ('0' + (date.getDate()-1)).slice(-2);
+      strExp  = '//regular:link[contains(@href,"'
+              + strDate
+              + '") and contains(@href,"_VPFG50_") and contains(@href,"'
+              + forecast.prefecture
+              + '")]';
+      elms = evaluateXPath('regular', jmaRegularXML.responseXML, strExp);
+    }
+    if(elms.length) {
+      ret = elms[0].getAttribute('href');
+    }
+    return ret;
+    // }}}
+  }
+
+  /*
   function getUrlJmaRegularL(sendResponse){
     // {{{
     jmaRegularXML=new XMLHttpRequest();
@@ -92,7 +186,7 @@
     jmaRegularXML.onreadystatechange=function(){
       if (jmaRegularXML.readyState == 4 && jmaRegularXML.status == 200){
         let strExp='//myns:id[contains(text(),"_VPFW50_'
-                    + codePrefecture
+                    + forecast.prefecture
                     + '") and contains(text(),"'
                     + strDate
                     + '")]/../myns:link';
@@ -102,40 +196,19 @@
     jmaRegularXML.send(null);
     // }}}
   }
+  */
 
-  function getUrlJmaRegular(sendResponse){
+  function getUrlJmaRegular(){
     // {{{
-    console.log('Regular');
     jmaRegularXML=new XMLHttpRequest();
     jmaRegularXML.open('GET',urlJmaRegularL);
     jmaRegularXML.onreadystatechange=function(){
       if (jmaRegularXML.readyState == 4 && jmaRegularXML.status == 200){
-        let date= new Date();
-        let strDate = date.getFullYear()
-                      + ('0' + (date.getMonth() + 1)).slice(-2)
-                      + ('0' + date.getDate()).slice(-2);
-        let strExp  = '//myns:link[contains(@href,"'
-                    + strDate
-                    + '") and contains(@href,"_VPFD50_") and contains(@href,"'
-                    + codePrefecture
-                    + '")]';
-        let elms = evaluateXPath(jmaRegularXML.responseXML, strExp);
-        if(!elms.length) { // 当日の府県天気予報がまだ未発表のとき
-          strDate = date.getFullYear()
-                  + ('0' + (date.getMonth() + 1)).slice(-2)
-                  + ('0' + (date.getDate()-1)).slice(-2);
-          strExp  = '//myns:link[contains(@href,"'
-                  + strDate
-                  + '") and contains(@href,"_VPFD50_") and contains(@href,"'
-                  + codePrefecture
-                  + '")]';
-          elms = evaluateXPath(jmaRegularXML.responseXML, strExp);
-        }
-        if(elms.length) {
-          urlJmaDaily = elms[0].getAttribute('href');
-          getDailyXML(sendResponse);
+        urlJmaOverall = getUrlOverall();  // store URL of Jma Overall
+        if(urlJmaOverall) {
+          getOverallXML();
         } else {
-          console.log('府県予報未発表');
+          console.log('府県天気概況未発表');
         }
       }
     }
@@ -161,11 +234,14 @@
     // }}}
   }
 
+  // データ取得要求応答処理
   chrome.runtime.onMessage.addListener(
+    // {{{
     function(request,sender,sendResponse){
-      if(request.command == "getDaily") {
-        codePrefecture = request.prefecture;
-        getUrlJmaRegular(sendResponse);
+      storeSendResponse = sendResponse;
+      if(request.command == "getWeather") {
+        forecast.prefecture = request.prefecture;
+        getUrlJmaRegular();
       } else if (request.command == "jma" ) {
         openJma();
       } else if (request.command == "htb" ) {
@@ -173,7 +249,23 @@
       }
       return true;
     }
+    // }}}
   );
+
+  browser.browserAction.onClicked.addListener((tab)=>{
+    // {{{
+    var creating = browser.windows.create({
+      url:    mainURL,
+      type:   "popup",
+      height: 392,
+      width:  1024
+    });
+    creating.then((win)=>{
+    },(result)=>{
+      console.log("Main Window Create Error");
+    });
+    // }}}
+  })
 
   chrome.windows.getCurrent({populate: true},function(win){
     windowId=win.id;
