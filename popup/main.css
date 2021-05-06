@@ -40,16 +40,12 @@
   border-width:1px;
   border-style:solid solid solid solid;
 }
-#day0 {
-  background-color:#ffffff;
-}
-#day1 {
+#day0, #day1, #day8, #day9 {
   background-color:#ffffff;
 }
 .date_box{
   width:101px;
   height:28px;
-  font-size:0.75em;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -69,19 +65,22 @@
   height:28px;
   border-width:1px;
   border-top-style:solid;
-  font-size:0.75em;
   display:flex;
   align-items:center;
   justify-content:center;
+}
+.lowTemp {
+  color:blue;
+}
+.heighTemp {
+  color:red;
 }
 .probability_box{
   width:101px;
   height:28px;
   border-width:1px;
   border-top-style:solid;
-  font-size:0.75em;
   display:flex;
-  align-items:center;
   justify-content:center;
 }
 .menu_button{

@@ -150,94 +150,118 @@
     // }}}
   }
 
-  function dispContentsWeather(xmldoc){
+  function dispProbs(pStep, pDate){
     // {{{
-    var id;
-    var probs;
-    var forecasts=xmldoc.getElementsByTagName('wm:forecast');
-    var forecast;
-    var days;
-    var textNode;
-    var pNode;
-    var w;
-    var url;
-    var t;
+    let start     = pStep*8;
+    let strExp    = '//div[@id="day'
+                  + (start+pDate)
+                  +'"]//div[@class="probability_box"]/span';
+    let elms      = evaluateXPath(document,strExp);
+    let maxProbs  = hutteNippon.weatherData.steps[pStep].days[pDate].probs.length;
+    let str = '';
+    for(var i=0;i<maxProbs;i++){
+      str += hutteNippon.weatherData.steps[pStep].days[pDate].probs[i];
+      if(i<(maxProbs-1)) str += '/';
+    }
+    elms[0].appendChild( document.createTextNode(str));
+    // }}}
+  }
 
-    if(3<=forecasts.length){
-      forecast=forecasts.item(2);
-      days=forecast.getElementsByTagName('wm:content');
-      for(var i=0,max=days.length;i<max;i++){
-        // 日付表示
-        id="day"+i;
-        textNode=document.createTextNode(days.item(i).getAttribute('date')
-          .substr(5)+'('+days.item(i).getAttribute('wday')+')');
-        pNode=document.getElementById(id).childNodes.item(1).childNodes.item(1);
-        pNode.appendChild(textNode);
-        switch (days.item(i).getAttribute('wday')){
-        case 'Sat':
-          document.getElementById(id).childNodes.item(1).childNodes.item(1)
-            .style.color='blue';
-          break;
-        case 'Sun':
-          document.getElementById(id).childNodes.item(1).childNodes.item(1)
-            .style.color='red';
-          break;
-        default:
-          document.getElementById(id).childNodes.item(1).childNodes.item(1)
-            .style.color='black'
-          ;break;
-        }
+  function dispTemps(pStep, pDate){
+    // {{{
+    let start = pStep*8;
+    let str   = '';
+    let strExp, elms;
+    for(var i=0;i<2;i++){
+      str = hutteNippon.weatherData.steps[pStep].days[pDate].temps[i];
+      strExp  = '//div[@id="day'
+              + (start+pDate)
+              +'"]//div[@class="temperature_box"]/span['+(2+i)+']';
+      elms    = evaluateXPath(document,strExp);
+      elms[0].appendChild(document.createTextNode(str));
+    }
+    // }}}
+  }
 
-        // 天気表示
-        w=days.item(i).getElementsByTagName('wm:weather').item(0).childNodes
-          .item(0).nodeValue;
-        pNode=document.getElementById(id).childNodes.item(3).childNodes.item(1);
-        pNode.appendChild(document.createTextNode(w));
-        url=chrome.extension.getURL("icons/"+hWeather[w]);
-        pNode=document.getElementById(id).childNodes.item(3).childNodes.item(4);
-        pNode.setAttribute("src",url);
+  function dispIconWeather(pStep, pDate){
+    // {{{
+    let start   = pStep*8;
+    let strExp  = '//div[@id="day'
+                + (start+pDate)
+                +'"]//div[@class="weather_icon_box"]/img';
+    let elms    = evaluateXPath(document,strExp);
+    let url     =chrome.extension.getURL('icons/'
+                    +hutteNippon.weatherData.steps[pStep].days[pDate].wcode
+                    +'.svg');
+    if(elms.length){
+      elms[0].setAttribute('style',"width:72px;height:32px;");
+      elms[0].setAttribute('src',url)
+    }
+    // }}}
+  }
 
-        // 気温表示
-        t=days.item(i).getElementsByTagName('wm:max').item(0).childNodes.item(0)
-          .nodeValue;
-        pNode=document.getElementById(id).childNodes.item(5).childNodes.item(1);
-        pNode.appendChild(document.createTextNode(t));
-        pNode.style.color='red';
-        t=days.item(i).getElementsByTagName('wm:min').item(0).childNodes.item(0)
-          .nodeValue;
-        pNode=document.getElementById(id).childNodes.item(5).childNodes.item(5);
-        pNode.appendChild(document.createTextNode(t));
-        pNode.style.color='blue';
+  function dispStrWeather(pStep, pDate){
+    // {{{
+    let start   = pStep*8;
+    let strExp  = '//div[@id="day'
+                + (start+pDate)
+                +'"]//div[@class="weather_icon_box"]/span';
+    let elms    = evaluateXPath(document,strExp);
+    if(elms.length){
+      elms[0].appendChild(
+        document.createTextNode(
+          hutteNippon.weatherData.steps[pStep].days[pDate].weather
+        )
+      )
+    }
+    // }}}
+  }
 
-        // 降水確率表示
-        if(2>i){
-          probs=days.item(i).getElementsByTagName('wm:prob');
-          switch(probs.length){
-          case 1:
-            p='-/-/-/'+probs.item(0).childNodes.item(0).nodeValue;
-            break;
-          case 2:
-            p='-/-/'+probs.item(0).childNodes.item(0).nodeValue
-              +'/'+probs.item(1).childNodes.item(0).nodeValue;
-            break;
-          case 3:
-            p='-/'+probs.item(0).childNodes.item(0).nodeValue
-              +'/'+probs.item(1).childNodes.item(0).nodeValue
-              +'/'+probs.item(2).childNodes.item(0).nodeValue;
-            break;
-          case 4:
-            p=probs.item(0).childNodes.item(0).nodeValue
-              +'/'+probs.item(1).childNodes.item(0).nodeValue
-              +'/'+probs.item(2).childNodes.item(0).nodeValue
-              +'/'+probs.item(3).childNodes.item(0).nodeValue;
-            break;
-          }
-        }else{
-          p=days.item(i).getElementsByTagName('wm:prob').item(0).childNodes
-            .item(0).nodeValue;
-        }
-        pNode=document.getElementById(id).childNodes.item(7).childNodes.item(1);
-        pNode.appendChild(document.createTextNode(p));
+  function dispDate(pStep, pDate){
+    // {{{
+    let start   = pStep*8;
+    let strExp  = '//div[@id="day'
+                +(start+pDate)
+                +'"]//div[@class="date_box"]/span';
+    let elms    = evaluateXPath(document,strExp);
+    if(elms.length){
+      elms[0].appendChild(
+        document.createTextNode(
+          hutteNippon.weatherData.steps[pStep].days[pDate].date
+        )
+      )
+    }
+    // }}}
+  }
+
+  function dispRegion(pStep){
+    // {{{
+    let strExp = '//span[@id="pref0'+(pStep+1)+'"]';
+    let elms = evaluateXPath(document,strExp);
+    elms[0].childNodes[0].nodeValue = hutteNippon.weatherData.steps[pStep].region;
+    /*
+    elms[0].appendChild(
+      document.createTextNode(
+        hutteNippon.weatherData.steps[pStep].region
+      )
+    )
+    */
+    // }}}
+  }
+
+  function dispContentsWeather(){
+    // {{{
+    let maxSteps = hutteNippon.weatherData.steps.length;
+    let maxDays;
+    for(var i=0; i<maxSteps; i++){
+      dispRegion(i);
+      maxDays = hutteNippon.weatherData.steps[i].days.length;
+      for(var j=0;j<maxDays;j++){
+        dispDate(i,j);
+        dispStrWeather(i,j);
+        dispIconWeather(i,j);
+        dispTemps(i,j);
+        dispProbs(i,j);
       }
     }
     // }}}
@@ -246,17 +270,43 @@
   function clearContentsWeather(){
     // {{{
     let strXPath;
-    let originNode = [];
+    let elms;
 
+    for(var i=0; i<2;i++){
+      strXPath = '//span[@id="pref0'+(i+1)+'"]';
+      elms = evaluateXPath(document,strXPath);
+      elms[0].innerHTML = "&nbsp;";
+    }
     for (var i=0; i<16; i++) {
-      strXPath = '//div[@id="day'+i+'"]';
-      originNode = evaluateXPath(document, strXPath);
-      originNode[0].childNodes[1].childNodes[1].textContent = "";   // 日付
-      originNode[0].childNodes[3].childNodes[1].textContent = "";   // 天気文字列
-                                                                    // 天気アイコン
-      originNode[0].childNodes[3].childNodes[4].setAttribute("src", "");
-      originNode[0].childNodes[5].childNodes[3].textContent = "/";  // 温度
-      originNode[0].childNodes[7].childNodes[1].textContent = "";   // 降水確率
+      // 日付
+      strXPath = '//div[@id="day'+i+'"]//span[@class="date"]';
+      elms= evaluateXPath(document, strXPath);
+      elms[0].textContent= "";
+      // 天気文字列
+      strXPath = '//div[@id="day'+i+'"]/div[@class="weather_icon_box"]/span';
+      elms= evaluateXPath(document, strXPath);
+      elms[0].textContent= "";
+      // 天気アイコン
+      strXPath = '//div[@id="day'+i+'"]/div[@class="weather_icon_box"]/img';
+      elms= evaluateXPath(document, strXPath);
+      elms[0].setAttribute('src',"");
+      elms[0].setAttribute('style',"");
+      // 最低温度
+      strXPath  = '//div[@id="day'
+                +i
+                +'"]/div[@class="temperature_box"]/span[@class="lowTemp"]';
+      elms= evaluateXPath(document, strXPath);
+      elms[0].textContent= "";
+      // 最高温度
+      strXPath  = '//div[@id="day'
+                +i
+                +'"]/div[@class="temperature_box"]/span[@class="heighTemp"]';
+      elms= evaluateXPath(document, strXPath);
+      elms[0].textContent= "";
+      // 降水確率
+      strXPath = '//div[@id="day'+i+'"]/div[@class="probability_box"]/span';
+      elms= evaluateXPath(document, strXPath);
+      elms[0].textContent= "";
     }
     // }}}
   }
@@ -267,6 +317,7 @@
       function (response) {
         hutteNippon.weatherData = JSON.parse(response.doc);
         clearContentsWeather();
+        dispContentsWeather();
       }
     );
     // }}}
