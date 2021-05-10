@@ -6,9 +6,14 @@ body {
   display:flex;
   flex-flow:column;
 }
-#prefecture_box {
+#list_box{
   display:flex;
-  flex-flow:column;
+  flex-flow: row no-wrap;
+  justify-content:left;
+}
+#prefecture_box {
+}
+#region_box {
 }
 #button_box{
   padding:0.5em 0em 0em 0em;

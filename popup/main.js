@@ -7,13 +7,13 @@
   // {{{
   const pref = {
     "010000" : "気象庁",
-    "011000" : "北海道 宗谷地方",
-    "012000" : "北海道 上川地方",
-    "013000" : "北海道 網走・北見・紋別地方",
-    "014100" : "北海道 釧路・根室・十勝地方",
-    "015000" : "北海道 胆振・日高地方",
-    "016000" : "北海道 石狩・空知・後志地方",
-    "017000" : "北海道 渡島・檜山地方",
+    "011000" : "北海道",
+    "012000" : "北海道",
+    "013000" : "北海道",
+    "014100" : "北海道",
+    "015000" : "北海道",
+    "016000" : "北海道",
+    "017000" : "北海道",
     "020000" : "青森県",
     "030000" : "岩手県",
     "040000" : "宮城県",
@@ -59,52 +59,10 @@
     "440000" : "大分県",
     "450000" : "宮崎県",
     "460100" : "鹿児島県",
-    "471000" : "沖縄県 沖縄本島地方",
-    "472000" : "沖縄県 南大東島地方",
-    "473000" : "沖縄県 宮古島地方",
-    "474000" : "沖縄県 石垣島・八重山地方"
-  };
-  const hWeather={              // お天気アイコン
-    '晴れ':'100.png',
-    '晴れ時々くもり':'101.png',
-    '晴れ一時くもり':'101.png',
-    '晴れ時々雨':'102.png',
-    '晴れ一時雨':'102.png',
-    '晴れ時々雪':'104.png',
-    '晴れ一時雪':'104.png',
-    '晴れのちくもり':'110.png',
-    '晴れのち雨':'112.png',
-    '晴れのち雪':'115.png',
-    'くもり':'200.png',
-    'くもり時々晴れ':'201.png',
-    'くもり一時晴れ':'201.png',
-    'くもり時々雨':'202.png',
-    'くもり一時雨':'202.png',
-    'くもり時々雪':'204.png',
-    'くもり一時雪':'204.png',
-    'くもりのち晴れ':'210.png',
-    'くもりのち雨':'212.png',
-    'くもりのち雪':'215.png',
-    '雨':'300.png',
-    '雨時々晴れ':'301.png',
-    '雨一時晴れ':'301.png',
-    '雨時々くもり':'302.png',
-    '雨一時くもり':'302.png',
-    '雨一時雪':'303.png',
-    '雨時々雪':'303.png',
-    '雨のち晴れ':'311.png',
-    '雨のちくもり':'313.png',
-    '雨のち雪':'314.png',
-    '雪':'400.png',
-    '雪時々晴れ':'401.png',
-    '雪一時晴れ':'401.png',
-    '雪時々くもり':'402.png',
-    '雪一時くもり':'402.png',
-    '雪時々雨':'403.png',
-    '雪一時雨':'403.png',
-    '雪のち晴れ':'411.png',
-    '雪のちくもり':'413.png',
-    '雪のち雨':'414.png'
+    "471000" : "沖縄県",
+    "472000" : "沖縄県",
+    "473000" : "沖縄県",
+    "474000" : "沖縄県"
   };
   // }}}
 
@@ -141,8 +99,11 @@
 
   function dispLocationButtonLavel(){
     // {{{
-    var elm=document.getElementById('locationButton');
-    var textNode=document.createTextNode(hutteNippon.prefecture+"の週間天気予報");
+    var elm       = document.getElementById('locationButton');
+    var textNode  = document.createTextNode(hutteNippon.prefecture
+                                            + ' ( '
+                                            + hutteNippon.region
+                                            + ' ) の週間天気予報');
     if(elm.childNodes.length>0){
       elm.removeChild(elm.childNodes.item(0));
     }
@@ -150,32 +111,30 @@
     // }}}
   }
 
-  function dispProbs(pStep, pDate){
+  function dispProbs(pDate){
     // {{{
-    let start     = pStep*8;
     let strExp    = '//div[@id="day'
-                  + (start+pDate)
+                  + pDate
                   +'"]//div[@class="probability_box"]/span';
     let elms      = evaluateXPath(document,strExp);
-    let maxProbs  = hutteNippon.weatherData.steps[pStep].days[pDate].probs.length;
+    let maxProbs  = hutteNippon.weatherData.days[pDate].probs.length;
     let str = '';
     for(var i=0;i<maxProbs;i++){
-      str += hutteNippon.weatherData.steps[pStep].days[pDate].probs[i];
+      str += hutteNippon.weatherData.days[pDate].probs[i];
       if(i<(maxProbs-1)) str += '/';
     }
-    elms[0].appendChild( document.createTextNode(str));
+    elms[0].appendChild(document.createTextNode(str));
     // }}}
   }
 
-  function dispTemps(pStep, pDate){
+  function dispTemps(pDate){
     // {{{
-    let start = pStep*8;
     let str   = '';
     let strExp, elms;
     for(var i=0;i<2;i++){
-      str = hutteNippon.weatherData.steps[pStep].days[pDate].temps[i];
+      str = hutteNippon.weatherData.days[pDate].temps[i];
       strExp  = '//div[@id="day'
-              + (start+pDate)
+              + pDate
               +'"]//div[@class="temperature_box"]/span['+(2+i)+']';
       elms    = evaluateXPath(document,strExp);
       elms[0].appendChild(document.createTextNode(str));
@@ -183,15 +142,14 @@
     // }}}
   }
 
-  function dispIconWeather(pStep, pDate){
+  function dispIconWeather(pDate){
     // {{{
-    let start   = pStep*8;
     let strExp  = '//div[@id="day'
-                + (start+pDate)
+                + pDate
                 +'"]//div[@class="weather_icon_box"]/img';
     let elms    = evaluateXPath(document,strExp);
     let url     =chrome.extension.getURL('icons/'
-                    +hutteNippon.weatherData.steps[pStep].days[pDate].wcode
+                    +hutteNippon.weatherData.days[pDate].wcode
                     +'.svg');
     if(elms.length){
       elms[0].setAttribute('style',"width:72px;height:32px;");
@@ -200,69 +158,48 @@
     // }}}
   }
 
-  function dispStrWeather(pStep, pDate){
+  function dispStrWeather(pDate){
     // {{{
-    let start   = pStep*8;
     let strExp  = '//div[@id="day'
-                + (start+pDate)
+                + pDate
                 +'"]//div[@class="weather_icon_box"]/span';
     let elms    = evaluateXPath(document,strExp);
     if(elms.length){
       elms[0].appendChild(
         document.createTextNode(
-          hutteNippon.weatherData.steps[pStep].days[pDate].weather
+          hutteNippon.weatherData.days[pDate].weather
         )
       )
     }
     // }}}
   }
 
-  function dispDate(pStep, pDate){
+  function dispDate(pDate){
     // {{{
-    let start   = pStep*8;
     let strExp  = '//div[@id="day'
-                +(start+pDate)
+                + pDate
                 +'"]//div[@class="date_box"]/span';
     let elms    = evaluateXPath(document,strExp);
     if(elms.length){
       elms[0].appendChild(
         document.createTextNode(
-          hutteNippon.weatherData.steps[pStep].days[pDate].date
+          hutteNippon.weatherData.days[pDate].date
         )
       )
     }
     // }}}
   }
 
-  function dispRegion(pStep){
-    // {{{
-    let strExp = '//span[@id="pref0'+(pStep+1)+'"]';
-    let elms = evaluateXPath(document,strExp);
-    elms[0].childNodes[0].nodeValue = hutteNippon.weatherData.steps[pStep].region;
-    /*
-    elms[0].appendChild(
-      document.createTextNode(
-        hutteNippon.weatherData.steps[pStep].region
-      )
-    )
-    */
-    // }}}
-  }
-
   function dispContentsWeather(){
     // {{{
-    let maxSteps = hutteNippon.weatherData.steps.length;
     let maxDays;
-    for(var i=0; i<maxSteps; i++){
-      dispRegion(i);
-      maxDays = hutteNippon.weatherData.steps[i].days.length;
-      for(var j=0;j<maxDays;j++){
-        dispDate(i,j);
-        dispStrWeather(i,j);
-        dispIconWeather(i,j);
-        dispTemps(i,j);
-        dispProbs(i,j);
-      }
+    maxDays = hutteNippon.weatherData.days.length;
+    for(var i=0;i<maxDays;i++){
+      dispDate(i);
+      dispStrWeather(i);
+      dispIconWeather(i);
+      dispTemps(i);
+      dispProbs(i);
     }
     // }}}
   }
@@ -272,12 +209,7 @@
     let strXPath;
     let elms;
 
-    for(var i=0; i<2;i++){
-      strXPath = '//span[@id="pref0'+(i+1)+'"]';
-      elms = evaluateXPath(document,strXPath);
-      elms[0].innerHTML = "&nbsp;";
-    }
-    for (var i=0; i<16; i++) {
+    for (var i=0; i<8; i++) {
       // 日付
       strXPath = '//div[@id="day'+i+'"]//span[@class="date"]';
       elms= evaluateXPath(document, strXPath);
@@ -311,16 +243,18 @@
     // }}}
   }
 
-  function getWeatherData(pPref){
-    // {{{
-    chrome.runtime.sendMessage({command:"getWeather",prefecture:pPref},
+  function getWeatherData(pPref, pReg){
+    // {{
+    chrome.runtime.sendMessage(
+      {command:"getWeather",prefecture:pPref,region:pReg},
       function (response) {
         hutteNippon.weatherData = JSON.parse(response.doc);
+console.log(hutteNippon.weatherData);
         clearContentsWeather();
         dispContentsWeather();
       }
     );
-    // }}}
+    // }}
   }
 
   function getLocation() {
@@ -330,9 +264,10 @@
     gettingLocation.then((results)=>{
       if(results["location"]!=undefined){
         location=results["location"];
-        hutteNippon.prefecture=pref[location["prefecture"]];
+        hutteNippon.prefecture  = pref[location["prefecture"]];
+        hutteNippon.region      = location["region"];
         dispLocationButtonLavel();
-        getWeatherData(location["prefecture"]);
+        getWeatherData(location["prefecture"], location["region"]);
       }else{
         console.log("not found location");
         selectLocation();

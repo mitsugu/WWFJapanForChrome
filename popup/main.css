@@ -26,6 +26,9 @@
   margin-bottom:0.5em;
   font-weight:bold;
 }
+#lower_box{
+  margin-top:1em;
+}
 .day_box{
   width:101px;
   height:138px;
@@ -40,7 +43,7 @@
   border-width:1px;
   border-style:solid solid solid solid;
 }
-#day0, #day1, #day8, #day9 {
+#day0, #day1{
   background-color:#ffffff;
 }
 .date_box{

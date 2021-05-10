@@ -1,9 +1,9 @@
 {
   "manifest_version": 2,
-  "name": "Hütte Nippon Origin",
-  "version": "0.1.0",
+  "name": "Weekly Weather Forecast for Japan",
+  "version": "1.0.0",
 
-  "description": "日本の気象情報を表示します。",
+  "description": "日本の都道府県の週間天気予報を表示します。",
 
   "icons": {
     "48": "icons/48.png",
