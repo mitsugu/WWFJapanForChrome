@@ -152,7 +152,7 @@
                     +hutteNippon.weatherData.days[pDate].wcode
                     +'.png');
     if(elms.length){
-      elms[0].setAttribute('style',"width:72px;height:32px;");
+      elms[0].setAttribute('style',"width:60px;height:26px;visibility:visible;");
       elms[0].setAttribute('src',url)
     }
     // }}}
@@ -222,7 +222,7 @@
       strXPath = '//div[@id="day'+i+'"]/div[@class="weather_icon_box"]/img';
       elms= evaluateXPath(document, strXPath);
       elms[0].setAttribute('src',"");
-      elms[0].setAttribute('style',"");
+      elms[0].setAttribute('style',"visibility:hiden;");
       // 最低温度
       strXPath  = '//div[@id="day'
                 +i
@@ -244,7 +244,7 @@
   }
 
   function getWeatherData(pPref, pReg){
-    // {{
+    // {{{
     chrome.runtime.sendMessage(
       {command:"getWeather",prefecture:pPref,region:pReg},
       function (response) {
@@ -254,7 +254,7 @@ console.log(hutteNippon.weatherData);
         dispContentsWeather();
       }
     );
-    // }}
+    // }}}
   }
 
   function getLocation() {

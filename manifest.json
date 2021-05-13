@@ -3,6 +3,12 @@
   "name": "Weekly Weather Forecast for Japan",
   "version": "0.9.0",
 
+  "applications": {
+    "gecko": {
+      "id": "wwfj@orzbruford.com"
+    }
+  },
+
   "description": "日本の週間天気予報を表示します。",
 
   "icons": {
