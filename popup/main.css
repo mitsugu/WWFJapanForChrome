@@ -63,6 +63,10 @@
   display: table-cell;
   vertical-align: middle;
 }
+.weather_icon{
+  width:60px!important;
+  height:26px!important;
+}
 .temperature_box{
   width:101px;
   height:28px;

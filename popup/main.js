@@ -150,7 +150,7 @@
     let elms    = evaluateXPath(document,strExp);
     let url     =chrome.extension.getURL('icons/'
                     +hutteNippon.weatherData.days[pDate].wcode
-                    +'.svg');
+                    +'.png');
     if(elms.length){
       elms[0].setAttribute('style',"width:72px;height:32px;");
       elms[0].setAttribute('src',url)
