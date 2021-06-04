@@ -86,7 +86,7 @@
                 + '//jmx_eb:ProbabilityOfPrecipitation[@type="日降水確率" and @refID="'
                 + (getSkipDayNo()+pDay+1)
                 + '"]/text()';
-    elms        = evaluateXPath('bdw', doc, strExp);
+    elms        = evaluateXPath('bdw', jmaWeeklyXML, strExp);
     forecast.days[pDay+2].probs.push(elms[0].nodeValue);
     // }}}
   }
@@ -107,7 +107,7 @@
                 + '//jmx_eb:Temperature[@type="最低気温" and @refID="'
                 + (skipNo+pDay+1)
                 + '"]/text()';
-    elms        = evaluateXPath('bdw', doc, strExp);
+    elms        = evaluateXPath('bdw', jmaWeeklyXML, strExp);
     forecast.days[pDay+2].temps.push(elms[0].nodeValue);
 
     // 最高気温
@@ -118,18 +118,17 @@
                 + '//jmx_eb:Temperature[@type="最高気温" and @refID="'
                 + (skipNo+pDay+1)
                 + '"]/text()';
-    elms        = evaluateXPath('bdw', doc, strExp);
+    elms        = evaluateXPath('bdw', jmaWeeklyXML, strExp);
     forecast.days[pDay+2].temps.push(elms[0].nodeValue);
     // }}}
   }
 
   function getWItemMax(){
     // {{{
-    let doc     = jmaWeeklyXML.responseXML;
     let strExp  = '//bdw:MeteorologicalInfos[@type="区域予報"]'
                 + '/bdw:TimeSeriesInfo'
                 + '//bdw:Item';
-    let items   = evaluateXPath('bdw', doc, strExp);
+    let items   = evaluateXPath('bdw', jmaWeeklyXML, strExp);
     return items.length;
     // }}}
   }
@@ -147,7 +146,7 @@
               + '//bdw:Item['
               + (i+1)
               + ']/bdw:Area/bdw:Name/text()';
-      items   = evaluateXPath('bdd', doc, strExp);
+      items   = evaluateXPath('bdd', jmaWeeklyXML, strExp);
       if(items[0].nodeValue==forecast.region){
         ret = i+1;
         break;
@@ -162,7 +161,6 @@
   function setDWeeklyWeather(pDay){
     // {{{
     let dateXML,strExp,elms;
-    let doc       = jmaWeeklyXML.responseXML;
     let skipNo    = getSkipDayNo();
     let itemIndex = getWItemIndex();
 
@@ -172,7 +170,7 @@
               + (pDay+skipNo+1)
               + '"]'
               + '/bdw:DateTime/text()'
-    elms      = evaluateXPath('bdw', doc, strExp);
+    elms      = evaluateXPath('bdw', jmaWeeklyXML, strExp);
     day.date  = elms[0].nodeValue.substr(5,5).replace(/-/,"/");
 
     // 天気文字列
@@ -184,7 +182,7 @@
                 + '/jmx_eb:Weather[@refID="'
                 + (pDay+skipNo+1)
                 + '"]/text()';
-    elms        = evaluateXPath('bdw', doc, strExp);
+    elms        = evaluateXPath('bdw', jmaWeeklyXML, strExp);
     day.weather = elms[0].nodeValue;
 
     // 天気コード
@@ -196,7 +194,7 @@
               + '/jmx_eb:WeatherCode[@refID="'
               + (pDay+skipNo+1)
               + '"]/text()';
-    elms      = evaluateXPath('bdw', doc, strExp);
+    elms      = evaluateXPath('bdw', jmaWeeklyXML, strExp);
     day.wcode = elms[0].nodeValue;
 
     forecast.days.push({...day});
@@ -210,7 +208,7 @@
                 + '//bdw:TimeDefine[@timeId="'
                 + (pDay+1)
                 + '"]/bdw:DateTime/text()';
-    let items   = evaluateXPath('bdw', doc, strExp);
+    let items   = evaluateXPath('bdw', jmaWeeklyXML, strExp);
     return items[0].nodeValue.replace(/-/g,"").substr(0,8);
     // }}}
   }
@@ -237,12 +235,11 @@
 
   function getDayNo(){
     // {{{
-    let doc     = jmaWeeklyXML.responseXML;
     strExp  = '//bdw:MeteorologicalInfos[@type="区域予報"]'
                 + '//bdw:Item[1]'
                 + '//bdw:WeatherPart'
                 + '/jmx_eb:Weather';
-    items   = evaluateXPath('bdw', doc, strExp);
+    items   = evaluateXPath('bdw', jmaWeeklyXML, strExp);
     if(items.length) return items.length;
     return 0;
     // }}}
@@ -261,15 +258,14 @@
 
   function getWeeklyXML(){
     // {{{
-    jmaWeeklyXML = new XMLHttpRequest();
-    jmaWeeklyXML.open('GET',urlJmaWeekly);
-    jmaWeeklyXML.onreadystatechange=function(){
-      if (jmaWeeklyXML.readyState == 4 && jmaWeeklyXML.status == 200){
+    fetch(urlJmaWeekly)
+      .then(response => response.text())
+      .then((data) => {
+        let domparser = new DOMParser();
+        jmaWeeklyXML  = domparser.parseFromString(data, "application/xml");
         setWeeklyWeather();
         sendJSON();
-      }
-    }
-    jmaWeeklyXML.send(null);
+      });
     // }}}
   }
 
@@ -292,7 +288,7 @@
               + '") and contains(@href,"_VPFW50_") and contains(@href,"'
               + forecast.prefecture
               + '")]';
-      let elms = evaluateXPath('regular', jmaRegularXML.responseXML, strExp);
+      let elms = evaluateXPath('regular', jmaRegularXML, strExp);
       if(elms.length){
         ret = elms[0].getAttribute('href');
         break;
@@ -374,11 +370,10 @@
   function setStep2DayTemps(){
     // {{{
     let date, time, strDuration,strType, strTemp,noTemp;
-    let doc       = jmaDailyXML.responseXML;
     let strExp    = '//bdd:MeteorologicalInfos[@type="地点予報"][1]'
                   + '/bdd:TimeSeriesInfo[1]'
                   + '//bdd:TimeDefine';
-    let items     = evaluateXPath('bdd', doc, strExp);
+    let items     = evaluateXPath('bdd', jmaDailyXML, strExp);
     let cntAll    = items.length;
     let itemIndex = conversionToPrimarySubdivision();
     for(var i=0;i<2;i++){
@@ -389,7 +384,7 @@
       strExp      = '//bdd:MeteorologicalInfos[@type="地点予報"][1]'
                   + '/bdd:TimeSeriesInfo[1]'
                   + '//bdd:TimeDefine[@timeId="'+(i+1)+'"]/bdd:Duration/text()';
-      items       = evaluateXPath('bdd', doc, strExp);
+      items       = evaluateXPath('bdd', jmaDailyXML, strExp);
       strDuration = items[0].nodeValue;
       if(strDuration != "PT9H") continue;
 
@@ -397,7 +392,7 @@
       strExp  = '//bdd:MeteorologicalInfos[@type="地点予報"][1]'
               + '/bdd:TimeSeriesInfo[1]'
               + '//bdd:TimeDefine[@timeId="'+(i+1)+'"]/bdd:DateTime/text()';
-      items   = evaluateXPath('bdd', doc, strExp);
+      items   = evaluateXPath('bdd', jmaDailyXML, strExp);
       date    = items[0].nodeValue.replace(/-/g,"").substr(0,8);
       // タイプ
       strExp  = '//bdd:MeteorologicalInfos[@type="地点予報"][1]'
@@ -406,7 +401,7 @@
               + itemIndex
               + ']'
               + '//jmx_eb:Temperature[@refID="'+(i+1)+'"]/@type';
-      items   = evaluateXPath('bdd', doc, strExp);
+      items   = evaluateXPath('bdd', jmaDailyXML, strExp);
       strType = items[0].nodeValue;
       // 温度
       strExp  = '//bdd:MeteorologicalInfos[@type="地点予報"][1]'
@@ -415,7 +410,7 @@
               + itemIndex
               + ']'
               + '//jmx_eb:Temperature[@refID="'+(i+1)+'"]/text()';
-      items   = evaluateXPath('bdd', doc, strExp);
+      items   = evaluateXPath('bdd', jmaDailyXML, strExp);
       strTemp = items[0].nodeValue;
 
       // json への push
@@ -450,7 +445,7 @@
     let strExp    = '//bdd:MeteorologicalInfos[@type="区域予報"][1]'
                   + '/bdd:TimeSeriesInfo[2]'
                   + '//bdd:TimeDefine';
-    let items     = evaluateXPath('bdd', doc, strExp);
+    let items     = evaluateXPath('bdd', jmaDailyXML, strExp);
     let cntAll    = items.length;
     let itemIndex = getItemIndex();
     let getPnt    = 1;
@@ -471,7 +466,7 @@
                 + '//jmx_eb:ProbabilityOfPrecipitation[@refID="'
                 + getPnt
                 + '"]/text()';
-        items   = evaluateXPath('bdd', doc, strExp);
+        items   = evaluateXPath('bdd', jmaDailyXML, strExp);
         forecast.days[i].probs.push(items[0].nodeValue);
         getPnt++;
       }
@@ -481,11 +476,10 @@
 
   function getItemMax(){
     // {{{
-    let doc = jmaDailyXML.responseXML;
     let strExp  = '//bdd:MeteorologicalInfos[@type="区域予報"][1]'
                 + '/bdd:TimeSeriesInfo[1]'
                 + '//bdd:Item';
-    let items   = evaluateXPath('bdd', doc, strExp);
+    let items   = evaluateXPath('bdd', jmaDailyXML, strExp);
     return items.length;
     // }}}
   }
@@ -494,7 +488,6 @@
     // {{{
     let strExp, items;
     let ret = 0;
-    let doc = jmaDailyXML.responseXML;
     let max = getItemMax();
     for(var i=0; i<max; i++){
       strExp  = '//bdd:MeteorologicalInfos[@type="区域予報"][1]'
@@ -502,7 +495,7 @@
               + '//bdd:Item['
               + (i+1)
               + ']/bdd:Area/bdd:Name/text()';
-      items   = evaluateXPath('bdd', doc, strExp);
+      items   = evaluateXPath('bdd', jmaDailyXML, strExp);
       if(items[0].nodeValue==forecast.region){
         ret = i+1;
         break;
@@ -515,7 +508,6 @@
   function setStep2DayWeater(){
     // {{{
     let strExp,items;
-    let doc     = jmaDailyXML.responseXML;
     let itemIndex = getItemIndex();
     // 天気予報設定
     for (var i=0; i<2; i++) {
@@ -524,7 +516,7 @@
                 + '/bdd:TimeSeriesInfo[1]'
                 + '//bdd:TimeDefine[@timeId="'+ (i+1) +'"]'
                 + '/bdd:DateTime/text()';
-      items     = evaluateXPath('bdd', doc, strExp);
+      items     = evaluateXPath('bdd', jmaDailyXML, strExp);
       day.date  = items[0].nodeValue.substr(5,5).replace(/-/,"/");
 
       //  天気設定
@@ -535,7 +527,7 @@
                 + itemIndex
                 + ']//jmx_eb:Weather[@refID="'+(i+1)+'"]'
                 + '/text()';
-      items     = evaluateXPath('bdd', doc, strExp);
+      items     = evaluateXPath('bdd', jmaDailyXML, strExp);
       day.weather = items[0].nodeValue;
 
       //  天気コード設定
@@ -546,7 +538,7 @@
                 + itemIndex
                 + ']//jmx_eb:WeatherCode[@refID="'+(i+1)+'"]'
                 + '/text()';
-      items     = evaluateXPath('bdd', doc, strExp);
+      items     = evaluateXPath('bdd', jmaDailyXML, strExp);
       day.wcode = items[0].nodeValue;
 
       forecast.days.push({...day});
@@ -565,28 +557,28 @@
 
   function getUrlJmaRegularL(){
     // {{{
-    jmaRegularXML=new XMLHttpRequest();
-    jmaRegularXML.open('GET',urlJmaRegularL);
-    jmaRegularXML.onreadystatechange=function(){
-      if (jmaRegularXML.readyState == 4 && jmaRegularXML.status == 200){
+    fetch(urlJmaRegularL)
+      .then(response => response.text())
+      .then((data) => {
+        let domparser = new DOMParser();
+        jmaRegularXML = domparser.parseFromString(data, "application/xml");
         urlJmaWeekly = getUrlWeekly();
         if(urlJmaWeekly.length){
           getWeeklyXML();
         }else{
           console.log('府県週間予報 XML の URL が見つからない');
         }
-      }
-    }
-    jmaRegularXML.send(null);
+      });
     // }}}
   }
 
   function getDailyXML(){
     // {{{
-    jmaDailyXML= new XMLHttpRequest();
-    jmaDailyXML.open('GET',urlJmaDaily);
-    jmaDailyXML.onreadystatechange=function(){
-      if (jmaDailyXML.readyState == 4 && jmaDailyXML.status == 200){
+    fetch(urlJmaDaily)
+      .then(response => response.text())
+      .then((data) => {
+        let domparser = new DOMParser();
+        jmaDailyXML   = domparser.parseFromString(data, "application/xml");
         set2DayWeather();
         urlJmaWeekly = getUrlWeekly();  // store URL of weekly weather forecast
         if(urlJmaWeekly.length){
@@ -594,15 +586,12 @@
         }else{
           getUrlJmaRegularL();
         }
-      }
-    }
-    jmaDailyXML.send(null);
+      });
     // }}}
   }
 
   function getUrlDaily(){
     // {{{
-    let doc     = jmaRegularXML.responseXML;
     let strExp  = "";
     let elms;
     let strDate = forecast.date;
@@ -623,7 +612,7 @@
               + '") and contains(@href,"_VPFD50_") and contains(@href,"'
               + forecast.prefecture
               + '")]';
-      elms    = evaluateXPath('regular', doc, strExp);
+      elms    = evaluateXPath('regular', jmaRegularXML, strExp);
       if(elms.length>0){
         ret = elms[0].getAttribute('href');
         break;
@@ -635,9 +624,8 @@
 
   function setOverall() {
     // {{{
-    let doc     = jmaOverallXML.responseXML;
     let strExp  = '//overall:Text[@type="本文"]/text()';
-    let elms    = evaluateXPath('overall', doc, strExp);
+    let elms    = evaluateXPath('overall', jmaOverallXML, strExp);
     if(elms.length){
       forecast.overall = elms[0].nodeValue;
     }
@@ -646,26 +634,24 @@
 
   function setTargetDate(){
     // {{{
-    let doc       = jmaOverallXML.responseXML;
     let strExp    = '//overallhead:TargetDateTime/text()';
-    let elms      = evaluateXPath('overallhead', doc, strExp);
+    let elms      = evaluateXPath('overallhead', jmaOverallXML, strExp);
     forecast.date = elms[0].nodeValue.replace(/-/g,"").substr(0,8);
     // }}}
   }
 
   function getOverallXML(){
     // {{{
-    jmaOverallXML = new XMLHttpRequest();
-    jmaOverallXML.open('GET',urlJmaOverall);
-    jmaOverallXML.onreadystatechange=function(){
-      if (jmaOverallXML.readyState == 4 && jmaOverallXML.status == 200){
+    fetch(urlJmaOverall)
+      .then(response => response.text())
+      .then((data) => {
+        let domparser = new DOMParser();
+        jmaOverallXML = domparser.parseFromString(data, "application/xml");
         setTargetDate();
         setOverall();
         urlJmaDaily = getUrlDaily();  // store URL of daily weather forecast
         getDailyXML();
-      }
-    }
-    jmaOverallXML.send(null);
+      });
     // }}}
   }
 
@@ -684,7 +670,7 @@
               + '") and contains(@href,"_VPFG50_") and contains(@href,"'
               + forecast.prefecture
               + '")]';
-      let elms = evaluateXPath('regular', jmaRegularXML.responseXML, strExp);
+      let elms = evaluateXPath('regular', jmaRegularXML, strExp);
       if(elms.length) {
         ret = elms[0].getAttribute('href');
         break;
@@ -696,19 +682,18 @@
 
   function getUrlJmaRegular(){
     // {{{
-    jmaRegularXML=new XMLHttpRequest();
-    jmaRegularXML.open('GET',urlJmaRegular);
-    jmaRegularXML.onreadystatechange=function(){
-      if (jmaRegularXML.readyState == 4 && jmaRegularXML.status == 200){
+    fetch(urlJmaRegular)
+      .then(response => response.text())
+      .then((data) => {
+        let domparser = new DOMParser();
+        jmaRegularXML = domparser.parseFromString(data, "application/xml");
         urlJmaOverall = getUrlOverall();  // store URL of Jma Overall
         if(urlJmaOverall.length>0) {
           getOverallXML();
         } else {
           console.log('府県天気概況未発表');
         }
-      }
-    }
-    jmaRegularXML.send(null);
+      });
     // }}}
   }
 
