@@ -1,11 +1,11 @@
 {
   "manifest_version": 2,
-  "name": "Weekly Weather Forecast for Japan",
+  "name": "Weekly Weather Forecast for Japan (β)",
   "version": "0.9.1",
 
   "applications": {
     "gecko": {
-      "id": "wwfj@orzbruford.com"
+      "id": "wwfj-beta@orzbruford.com"
     }
   },
 

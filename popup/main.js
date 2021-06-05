@@ -192,8 +192,7 @@
 
   function dispContentsWeather(){
     // {{{
-    let maxDays;
-    maxDays = hutteNippon.weatherData.days.length;
+    let maxDays = hutteNippon.weatherData.days.length;
     for(var i=0;i<maxDays;i++){
       dispDate(i);
       dispStrWeather(i);
@@ -222,7 +221,7 @@
       strXPath = '//div[@id="day'+i+'"]/div[@class="weather_icon_box"]/img';
       elms= evaluateXPath(document, strXPath);
       elms[0].setAttribute('src',"");
-      elms[0].setAttribute('style',"visibility:hiden;");
+      elms[0].setAttribute('style',"visibility:hidden;");
       // 最低温度
       strXPath  = '//div[@id="day'
                 +i
