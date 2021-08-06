@@ -42,6 +42,25 @@ function evaluateXPath(prefix, aNode, aExpr) {
   // }}}
 }
 
+function getOverallXML(url){
+  // {{{
+  return (new Promise( (resolve, reject) => {
+    fetch(url)
+      .then(response => response.text())
+      .then(data => {
+        if(data.length) {
+          let domparser = new DOMParser();
+          let jmaOverallXML = domparser.parseFromString(data, "application/xml");
+          resolve(jmaOverallXML);
+        } else {
+          reject('Can not get Overall XML data');
+        }
+
+      });
+  }));
+  // }}}
+}
+
 let getUrlOverall = (doc, pref) => {
   // {{{
   return ( new Promise((resolve, reject) => {
@@ -65,20 +84,20 @@ let getUrlOverall = (doc, pref) => {
       }
     }
     ret.length > 0 ? resolve(ret) : reject('not found overall XML data');
-  // }}}
   }));
+  // }}}
 }
 
-let getUrlJmaRegular = (url, pref) => {
+let getUrlJmaRegular = (url) => {
   // {{{
   return ( new Promise( (resolve, reject) => {
     fetch(url)
       .then(response => response.text())
       .then(data => {
         if(data.length) {
-          resolve(
-            getUrlOverall( new DOMParser().parseFromString(data, "application/xml"), pref)
-          );
+          let domparser = new DOMParser();
+          let jmaRegularXML = domparser.parseFromString(data, "application/xml");
+          resolve(jmaRegularXML);
         } else {
           reject('regular.xml url length : ' + data.length);
         }

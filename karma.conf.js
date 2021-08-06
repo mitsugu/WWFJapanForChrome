@@ -7,7 +7,10 @@ module.exports = function(config) {
     frameworks: ['mocha', 'sinon', 'browserify', 'power-assert'],
     files: [
       'bgs.v2.js',
-      'forkarma/**/*.js',
+      'forkarma/**/getUrlJmaRegular.test.js',
+      'forkarma/**/getUrlOverall.test.js',
+      'forkarma/**/getOverallXML.ok.test.js',
+      'forkarma/**/getOverallXML.false.test.js',
       {
         pattern : 'xmldata/**/*.xml',
         watched : true,

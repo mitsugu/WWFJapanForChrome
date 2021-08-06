@@ -39,24 +39,28 @@ describe("関数 getUrlJmaRegular のテスト\n", function() {
     stub.returns(xmlOk(strRegular));
   });
 
-  it ("正常なデータで getUrlJmaRegular() を呼び出した場合", async () => {
-    await getUrlJmaRegular( 'http://www.data.jma.go.jp/developer/xml/feed/regular.xml', '280000' )
+  it ("正しい url で getUrlJmaRegular() を呼び出した場合", async () => {
+    console.log("正しい url で getUrlJmaRegular() を呼び出した場合");
+    await getUrlJmaRegular( 'http://www.data.jma.go.jp/developer/xml/feed/regular.xml' )
       .then(data => {
-        console.log("\u001b[32m正常データ getUrlJmaRegular() URL : "+data+"\u001b[0m");
+        let s = new XMLSerializer();
+        console.log("\u001b[32m"+s.serializeToString(data)+"\u001b[0m");
+        console.log("\u001b[32mRegular.xml 受信\u001b[0m");
         assert(true);
       })
       .catch(err => {
-        assert.equal(err,"http://www.data.jma.go.jp/developer/xml/data/20210619013416_0_VPFG50_280000.xml","\u001b[31m正常データ getUrlJmaRegular() エラー : "+err+'\u001b[0m');
+        assert(err, "\u001b[31mNot Found Regular.xml : "+err+'\u001b[0m');
       });
   });
 
-  it ("不正な都道府県コードで getUrlJmaRegular() を呼び出した場合", async () => {
-    await getUrlJmaRegular( 'http://www.data.jma.go.jp/developer/xml/feed/regular.xml', '780000' )
+  it ("不正な url で getUrlJmaRegular() を呼び出した場合 ( 404 Not Found のシミュレート )", async () => {
+    console.log("不正な url で getUrlJmaRegular() を呼び出した場合");
+    await getUrlJmaRegular( 'http://www.data.jma.go.jp/developer/xml/feed/hogeiregular.xml' )
       .then(data => {
-        assert.notEqual(data,"http://www.data.jma.go.jp/developer/xml/data/20210619013416_0_VPFG50_280000.xml","\u001b[31m不正都道府県コード getUrlJmaRegular() URL "+data+'\u001b[0m');
+        assert(false,"\u001b[31mRegular.xml が見つかった ( テスト失敗 )"+data+'\u001b[0m');
       })
       .catch(err => {
-        console.log("\u001b[32m不正都道府県コード getUrlJmaRegular() エラー検出成功！！ : "+err+"\u001b[0m");
+        console.log("\u001b[32m不正な URL で Regular.xml が見つからなかった ( エラーハンドリング OK )\u001b[0m");
         assert(true);
       });
   });
