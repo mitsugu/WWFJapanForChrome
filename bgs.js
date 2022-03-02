@@ -285,7 +285,7 @@
               + ('0' + date.getDate()).slice(-2);
       strExp  = '//regular:link[contains(@href,"'
               + strDate
-              + '") and contains(@href,"_VPFW50_") and contains(@href,"'
+              + '") and contains(@href,"_VPFW5") and contains(@href,"'
               + forecast.prefecture
               + '")]';
       let elms = evaluateXPath('regular', jmaRegularXML, strExp);
@@ -609,7 +609,7 @@
               + ('0' + date.getDate()).slice(-2);
       strExp  = '//regular:link[contains(@href,"'
               + strDate
-              + '") and contains(@href,"_VPFD50_") and contains(@href,"'
+              + '") and contains(@href,"_VPFD5") and contains(@href,"'
               + forecast.prefecture
               + '")]';
       elms    = evaluateXPath('regular', jmaRegularXML, strExp);
@@ -667,7 +667,7 @@
               + ('0' + date.getDate()).slice(-2);
       strExp  = '//regular:link[contains(@href,"'
               + strDate
-              + '") and contains(@href,"_VPFG50_") and contains(@href,"'
+              + '") and contains(@href,"_VPFG5") and contains(@href,"'
               + forecast.prefecture
               + '")]';
       let elms = evaluateXPath('regular', jmaRegularXML, strExp);
