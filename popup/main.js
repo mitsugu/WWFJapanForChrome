@@ -186,6 +186,13 @@
           hutteNippon.weatherData.days[pDate].date
         )
       )
+      if ( hutteNippon.weatherData.days[pDate].dow == 6 ) {
+        elms[0].setAttribute( "class", "saturday" );
+      } else if ( hutteNippon.weatherData.days[pDate].dow == 0 ) {
+        elms[0].setAttribute( "class", "sunday" );
+      } else {
+        elms[0].setAttribute( "class", "weekday" );
+      }
     }
     // }}}
   }

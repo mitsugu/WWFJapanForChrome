@@ -100,3 +100,12 @@
 #jma_button{
   margin-top:1em;
 }
+.sunday{
+  color:red;
+}
+.saturday {
+  color:blue;
+}
+.weekday {
+  color:black;
+}

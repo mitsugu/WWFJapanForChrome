@@ -15,6 +15,7 @@
   // 日毎府県天気予報データ
   let day = {
     date    : "", // 日付
+    dow     : "", // 曜日
     weather : "", // 天気文字列
     wcode   : "", // 天気コード
     temps   : [], // 最高気温/最低気温
@@ -172,6 +173,8 @@
               + '/bdw:DateTime/text()'
     elms      = evaluateXPath('bdw', jmaWeeklyXML, strExp);
     day.date  = elms[0].nodeValue.substr(5,5).replace(/-/,"/");
+    var d     = new Date(elms[0].nodeValue);
+    day.dow   = d.getDay();
 
     // 天気文字列
     strExp      = '//bdw:MeteorologicalInfos[@type="区域予報"]'
@@ -518,6 +521,8 @@
                 + '/bdd:DateTime/text()';
       items     = evaluateXPath('bdd', jmaDailyXML, strExp);
       day.date  = items[0].nodeValue.substr(5,5).replace(/-/,"/");
+      var d     = new Date(items[0].nodeValue);
+      day.dow   = d.getDay();
 
       //  天気設定
       strExp    = '//bdd:MeteorologicalInfos[@type="区域予報"][1]'
