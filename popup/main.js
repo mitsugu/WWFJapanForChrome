@@ -187,11 +187,11 @@
         )
       )
       if ( hutteNippon.weatherData.days[pDate].dow == 6 ) {
-        elms[0].setAttribute( "class", "saturday" );
+        elms[0].setAttribute( "style", "color:blue;" );
       } else if ( hutteNippon.weatherData.days[pDate].dow == 0 ) {
-        elms[0].setAttribute( "class", "sunday" );
+        elms[0].setAttribute( "style", "color:red" );
       } else {
-        elms[0].setAttribute( "class", "weekday" );
+        elms[0].setAttribute( "style", "colro:black" );
       }
     }
     // }}}
