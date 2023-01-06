@@ -3,6 +3,10 @@
   padding:0.5em;
   resize:none;
 }
+#img{
+  width:600px;
+  height:581px
+}
 #ok_box{
   margin-top:1em;
   text-align:right;

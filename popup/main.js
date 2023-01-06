@@ -1,5 +1,5 @@
 (function(){
-  var overallURL = chrome.extension.getURL("popup/overall.html");
+  var overallURL = browser.runtime.getURL("popup/overall.html");
   var hutteNippon={};
   hutteNippon.prefecture="";    // 都道府県
   hutteNippon.weatherData = {}; // 府県天気予報 XML
@@ -82,7 +82,7 @@
 
   function selectLocation(){
     // {{{
-    var locationURL = browser.extension.getURL("popup/location.html");
+    var locationURL = browser.runtime.getURL("popup/location.html");
     var creating = browser.windows.create({
       url:        locationURL,
       type:       "popup",
@@ -148,7 +148,7 @@
                 + pDate
                 +'"]//div[@class="weather_icon_box"]/img';
     let elms    = evaluateXPath(document,strExp);
-    let url     =chrome.extension.getURL('icons/'
+    let url     =browser.runtime.getURL('icons/'
                     +hutteNippon.weatherData.days[pDate].wcode
                     +'.png');
     if(elms.length){
@@ -292,7 +292,7 @@ console.log(hutteNippon.weatherData);
 
   function openOverall(){
     // {{{
-    var urlAverall = chrome.extension.getURL("popup/overall.html");
+    var urlAverall = browser.runtime.getURL("popup/overall.html");
     var creating = chrome.windows.create({
       url:    urlAverall,
       type:   "popup",
@@ -305,13 +305,29 @@ console.log(hutteNippon.weatherData);
 
   function openMap(){
     // {{{
-    var urlMap = chrome.extension.getURL("popup/map.html");
+    var urlMap = browser.runtime.getURL("popup/map.html");
     var creating = chrome.windows.create({
       url:    urlMap,
       type:   "popup",
-      height: 528,
+      height: 672,
       width:  640
     },(win)=>{
+    });
+    // }}}
+  }
+
+  function openNowcast(){
+    // {{{
+    var urlNowcast  = browser.runtime.getURL("popup/nowcast.html");
+    chrome.windows.create({
+      url:    urlNowcast,
+      type:   "popup",
+      height: 574,
+      width:  688
+      /*
+      height: 832,
+      width:  1056
+      */
     });
     // }}}
   }
@@ -319,7 +335,7 @@ console.log(hutteNippon.weatherData);
   function openSatellite(){
     // {{{
     // open https://forecast.weathermap.jp/public_datas/SAT/IR-FL_P3-600m.jpg
-    var urlSatellite = chrome.extension.getURL("popup/satellite.html");
+    var urlSatellite = browser.runtime.getURL("popup/satellite.html");
     var creating = chrome.windows.create({
       url:    urlSatellite,
       type:   "popup",
@@ -370,6 +386,7 @@ console.log(hutteNippon.weatherData);
     document.getElementById('locationButton').addEventListener('click',selectLocation);
     document.getElementById('overall_button').addEventListener("click",openOverall);
     document.getElementById('map_button').addEventListener("click",openMap);
+    document.getElementById('nowcast_button').addEventListener("click",openNowcast);
     document.getElementById('satellite_button').addEventListener("click",openSatellite);
     document.getElementById('jma_button').addEventListener("click",openJma);
     document.getElementById('htb_button').addEventListener("click",openHtb);

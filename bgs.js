@@ -1,5 +1,5 @@
 (function(){
-  const mainURL = chrome.extension.getURL("popup/main.html");
+  const mainURL = browser.runtime.getURL("popup/main.html");
   const urlJmaRegular = 'http://www.data.jma.go.jp/developer/xml/feed/regular.xml';
   const urlJmaRegularL = 'http://www.data.jma.go.jp/developer/xml/feed/regular_l.xml';
   let windowId;
