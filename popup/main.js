@@ -323,7 +323,7 @@ console.log(hutteNippon.weatherData);
       url:    urlNowcast,
       type:   "popup",
       height: 574,
-      width:  688
+      width:  576
       /*
       height: 832,
       width:  1056

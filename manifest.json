@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "WWF Japan",
-  "version": "1.1.0",
+  "version": "1.1.1",
 
   "browser_specific_settings": {
     "gecko": {
@@ -34,6 +34,8 @@
     "https://www.jma.go.jp/",
     "http://www.data.jma.go.jp/",
     "https://www.data.jma.go.jp/",
+    "http://cyberjapandata.gsi.go.jp/",
+    "https://cyberjapandata.gsi.go.jp/",
     "storage",
     "tabs",
     "contextMenus"

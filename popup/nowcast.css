@@ -4,25 +4,31 @@
   resize:none;
   margin:0px;
 }
+#content {
+  width:768px;
+  height:768px;
+}
 .container {
-  width:1024px;
-  height:500px;
+  width:768px;
+  height:512px;
   display: grid;
   grid-gap: 0em;
   grid-template-columns: 256px 256px 256px 256px;
   grid-template-rows: 256px 256px 256px;
-  padding:0px;
-  margin:0px;
+  clip: rect(64px, 832px, 712px, 160px);
   transform-origin: top left;
-  transform: scale(0.65, 0.65);
+  transform: scale(0.8, 0.8);
 }
 div.base {
   filter: brightness(60%);
+  position: fixed;
+  top: -40px;
+  left: -108px;
 }
 div.overlap{
-  position: absolute;
-  top: 0.5em;
-  left: 0.5em;
+  position: fixed;
+  top: -40px;
+  left: -108px;
 }
 img{
   width:256px;
@@ -31,6 +37,9 @@ img{
 #ok_box{
   margin-top:1em;
   text-align:right;
+  position: fixed;
+  top: 520px;
+  right: 1%;
 }
 #ok_button{
   width:64px;
