@@ -3,8 +3,9 @@
   const urlJmaRegularL  = 'http://www.data.jma.go.jp/developer/xml/feed/regular_l.xml';
   let   jmaRegularXML;
   let   jmaWeeklyXML;
-  var   locationURL     = browser.runtime.getURL("popup/location.html");
-  var   overallURL      = browser.runtime.getURL("popup/overall.html");
+  let   jmaOverallXML;
+  var   locationURL     = chrome.runtime.getURL("popup/location.html");
+  var   overallURL      = chrome.runtime.getURL("popup/overall.html");
   // 日毎府県天気予報データ
   let day = {
     date    : "", // 日付
@@ -176,7 +177,7 @@
                 + pDate
                 +'"]//div[@class="weather_icon_box"]/img';
     let elms    = evaluateXPath('html', document,strExp);
-    let url     =browser.runtime.getURL('icons/'
+    let url     =chrome.runtime.getURL('icons/'
                     +hutteNippon.weatherData.days[pDate].wcode
                     +'.png');
     if(elms.length){
@@ -923,7 +924,7 @@
 
   function openOverall(){
     // {{{
-    var urlAverall = browser.runtime.getURL("popup/overall.html");
+    var urlAverall = chrome.runtime.getURL("popup/overall.html");
     chrome.windows.create({
       url:    urlAverall,
       type:   "popup",
@@ -935,12 +936,12 @@
 
   function openMap(){
     // {{{
-    var urlMap = browser.runtime.getURL("popup/map.html");
+    var urlMap = chrome.runtime.getURL("popup/map.html");
     var creating = chrome.windows.create({
       url:    urlMap,
       type:   "popup",
-      height: 672,
-      width:  640
+      width:  504,
+      height: 544,
     },(win)=>{
     });
     // }}}
@@ -948,7 +949,7 @@
 
   function openNowcast(){
     // {{{
-    var urlNowcast  = browser.runtime.getURL("popup/nowcast.html");
+    var urlNowcast  = chrome.runtime.getURL("popup/nowcast.html");
     chrome.windows.create({
       url:    urlNowcast,
       type:   "popup",
@@ -965,7 +966,7 @@
   function openSatellite(){
     // {{{
     // open https://forcast.weathermap.jp/public_datas/SAT/IR-FL_P3-600m.jpg
-    var urlSatellite = browser.runtime.getURL("popup/satellite.html");
+    var urlSatellite = chrome.runtime.getURL("popup/satellite.html");
     var creating = chrome.windows.create({
       url:    urlSatellite,
       type:   "popup",
@@ -978,13 +979,15 @@
 
   function openHtb(){
     // {{{
-    chrome.runtime.sendMessage({command:"htb"}, function (response){});
+    chrome.tabs.create(
+      {"url":"https://www.hbc.co.jp/weather/pro-weather.html"}
+    );
     // }}}
   }
 
   function openJma(){
     // {{{
-    browser.runtime.sendMessage({command:"jma"}, function (response){});
+    chrome.tabs.create({"url":"https://www.jma.go.jp/jma/index.html"});
     // }}}
   }
 
@@ -1007,7 +1010,7 @@
 
   function selectLocation(){
     // {{{
-    browser.windows.create({
+    chrome.windows.create({
       url:    locationURL,
       type:   "popup",
       width:  384,
@@ -1019,7 +1022,7 @@
   function getLocation() {
     // {{{
     let location;
-    browser.storage.local.get("location")
+    chrome.storage.local.get("location")
       .then((results)=>{
         if(results["location"]!=undefined){
           day.temps.length    = 0;

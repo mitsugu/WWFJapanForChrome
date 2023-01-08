@@ -1,5 +1,5 @@
 (function(){
-  var mainURL = browser.runtime.getURL("popup/main.html");
+  var mainURL = chrome.runtime.getURL("popup/main.html");
   const region = {
     "011000" : ["宗谷地方"],
     "012000" : ["上川地方","留萌地方"],
@@ -60,7 +60,7 @@
   };
 
   function setItem() {
-    browser.runtime.sendMessage({status:"set location"});
+    chrome.runtime.sendMessage({status:"set location"});
     window.close();
   }
 
@@ -72,7 +72,7 @@
   function onOK(){
     var elmPref = document.getElementById('pref_list');
     var elmReg  = document.getElementById('reg_list');
-    browser.storage.local.set(
+    chrome.storage.local.set(
       {"location":{"prefecture":elmPref.value,"region":elmReg.value}}
     ).then(setItem, onError);
   }
